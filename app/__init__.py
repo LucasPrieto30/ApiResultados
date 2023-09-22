@@ -10,4 +10,6 @@ def create_app():
 
     api.add_namespace(ns)
 
+    CORS(app)
+
     return app
