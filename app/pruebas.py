@@ -13,6 +13,6 @@ class Pruebas(Resource):
     
 @ns.route("/")
 class Pruebas(Resource):
-    @cross_origin()
+    @cross_origin
     def get(self):
         return {"saludo": "hola get"}, 200
