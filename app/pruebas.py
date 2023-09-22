@@ -9,7 +9,7 @@ class Pruebas(Resource):
     def post(self):
         return {"saludo": "hola post"}, 200
     
-@ns.route("/")
+@ns.route("")
 class Pruebas(Resource):
     def get(self):
         return {"saludo": "hola get"}, 200
