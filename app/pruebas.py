@@ -1,6 +1,6 @@
 from flask_restx import Resource, Namespace, fields
 from .modelos import post_model
-from flask_cors import CORS
+from flask_cors import cross_origin
 
 ns = Namespace("Pruebas")
 
