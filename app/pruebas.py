@@ -1,6 +1,6 @@
 from flask_restx import Resource, Namespace, fields
 from .modelos import post_model
-#random
+#random para prediccion res
 import random
 
 ns = Namespace("Pruebas")
