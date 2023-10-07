@@ -1,11 +1,11 @@
 from flask_restx import Resource, Namespace, fields
-from .modelos import post_model, post_model1
+from .modelos import post_model, pacienteDiagnostico
 from .crud_diagnosticos import CrudDiagnostico
 #random para prediccion res
 import random
 
 ns = Namespace("Pruebas")
-ns2 = Namespace("Pruebas de Diagnosticos")
+ns2 = Namespace("Diagnosticos")
 crud = CrudDiagnostico()
 
 
@@ -40,27 +40,30 @@ class PruebasPredicciones(Resource):
     
 
 
-@ns2.route("/Diagnóstico_GET")
+@ns2.route("/all")
 class DiagnosticoListResource(Resource):
+    @ns2.doc(responses={200: 'Éxito', 204: 'No hay diagnósticos para mostrar'})
     def get(self):
         diagnostico = crud.mostrar_diagnosticos()
         if diagnostico:
             return diagnostico, 200
-        else:
-            return {"error": "Diagnósticos no encontrado o lista vacia"}, 404
+        elif len(diagnostico) == 0:
+            return {"message": "No hay diagnósticos disponibles para mostrar"}, 204
 
-@ns2.route("/Diagnóstico_GET_ID/<int:id_diagnostico>")
+@ns2.route("/<int:id_diagnostico>")
 class DiagnosticoResource(Resource):
+    @ns2.doc(responses={200: 'Éxito', 204: 'No existe diagnostico con el id seleccionado'})
     def get(self, id_diagnostico):
         diagnostico = crud.obtener_diagnostico(id_diagnostico)
         if diagnostico:
             return diagnostico, 200
         else:
-            return {"error": "Diagnóstico no encontrado o id no existe"}, 404
+             return {"message": "No existe diagnóstico con id" + str(id_diagnostico)}, 204
 
-@ns2.route("/Diagnóstico_POST")
+@ns2.route("")
 class DiagnosticoCreate(Resource):
-    @ns.expect(post_model1)
+    @ns.expect(pacienteDiagnostico)
+    @ns2.doc(responses={201: 'Éxito', 500: 'Error al enviar el diagnóstico'})
     def post(self):
         # tener los datos del diagnóstico del cuerpo de la solicitud
         nuevo_diagnostico = ns.payload
@@ -75,11 +78,11 @@ class DiagnosticoCreate(Resource):
 
 
 
-@ns2.route("/Diagnóstico_delete_ejemplo")
+@ns2.route("/deleteAll")
 class DiagnosticoDeleteResource(Resource):
     def delete(self):
         #diagnostico = crud.resetear_diagnosticos()
         if crud.resetear_diagnosticos():
             return {"message": "Diagnósticos eliminados correctamente"}, 200
         else:
-            return {"error": "Diagnósticos no se pudo borrar"}, 404
+            return {"error": "No se pudieron eliminar los diagnósticos"}, 500

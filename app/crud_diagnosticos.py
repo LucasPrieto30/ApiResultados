@@ -12,13 +12,13 @@ class CrudDiagnostico:
     def crear_diagnostico(self, datos_diagnostico):
         # Lógica para crear un diagnóstico y agregarlo a la lista
         nuevo_diagnostico = {
-            "ID_user": datos_diagnostico.get("ID_user"),
+            "UsuarioId": datos_diagnostico.get("UsuarioId"),
             "Edad": datos_diagnostico.get("Edad"),
             "Peso": datos_diagnostico.get("Peso"),
-            "Altura cm": datos_diagnostico.get("Altura cm"),
+            "AlturaCM": datos_diagnostico.get("AlturaCM"),
             "Sexo": datos_diagnostico.get("Sexo"),
-            "Sección del cuerpo": datos_diagnostico.get("Sección del cuerpo"),
-            "condiciones previas": datos_diagnostico.get("condiciones previas"),
+            "SeccionCuerpo": datos_diagnostico.get("SeccionCuerpo"),
+            "CondicionesPrevias": datos_diagnostico.get("CondicionesPrevias"),
             "Imagen": datos_diagnostico.get("Imagen")
         }
         nuevo_diagnostico = {"id": len(self.diagnosticos) + 1, **datos_diagnostico}
@@ -30,21 +30,21 @@ class CrudDiagnostico:
         # Lógica para obtener un diagnóstico de la lista por su ID
         for diagnostico in self.diagnosticos:
             if diagnostico["id"] == id_diagnostico:
-                # Obtener el ID_user y el ID_rol correspondientes al diagnóstico
-                ID_user = diagnostico.get("ID_user")
+                # Obtener el UsuarioId y el ID_rol correspondientes al diagnóstico
+                UsuarioId = diagnostico.get("UsuarioId")
                 ID_rol = diagnostico.get("ID_rol")
 
                 datos_diagnostico = {
                     "id": diagnostico.get("id"),
-                    "ID_user": ID_user,
+                    "UsuarioId": UsuarioId,
                     "ID_rol": ID_rol,
                     "diagnostico/resultados": {
                         "Edad": diagnostico.get("Edad"),
                         "Peso": diagnostico.get("Peso"),
-                        "Altura cm": diagnostico.get("Altura cm"),
+                        "AlturaCM": diagnostico.get("AlturaCM"),
                         "Sexo": diagnostico.get("Sexo"),
-                        "Sección del cuerpo": diagnostico.get("Sección del cuerpo"),
-                        "condiciones previas": diagnostico.get("condiciones previas"),
+                        "SeccionCuerpo": diagnostico.get("SeccionCuerpo"),
+                        "CondicionesPrevias": diagnostico.get("CondicionesPrevias"),
                         "Imagen": diagnostico.get("Imagen")
                     }
                 }
@@ -75,21 +75,21 @@ class CrudDiagnostico:
     def mostrar_diagnosticos(self):
         lista_diagnosticos = []
         for diagnostico in self.diagnosticos:
-            # Obtener el ID_user y el ID_rol correspondientes al diagnóstico
-            ID_user = diagnostico.get("ID_user")
+            # Obtener el UsuarioId y el ID_rol correspondientes al diagnóstico
+            UsuarioId = diagnostico.get("UsuarioId")
             ID_rol = diagnostico.get("ID_rol")
 
             datos_diagnostico = {
                 "id": diagnostico.get("id"),
-                "ID_user": ID_user,
+                "UsuarioId": UsuarioId,
                 "ID_rol": ID_rol,
                 "diagnostico/resultados": {
                     "Edad": diagnostico.get("Edad"),
                     "Peso": diagnostico.get("Peso"),
-                    "Altura cm": diagnostico.get("Altura cm"),
+                    "AlturaCM": diagnostico.get("AlturaCM"),
                     "Sexo": diagnostico.get("Sexo"),
-                    "Sección del cuerpo": diagnostico.get("Sección del cuerpo"),
-                    "condiciones previas": diagnostico.get("condiciones previas"),
+                    "SeccionCuerpo": diagnostico.get("SeccionCuerpo"),
+                    "CondicionesPrevias": diagnostico.get("CondicionesPrevias"),
                     "Imagen": diagnostico.get("Imagen")
                 }
             }
