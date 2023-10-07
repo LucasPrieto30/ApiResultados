@@ -1,6 +1,9 @@
 from flask_restx import Resource, Namespace, fields
 from .modelos import post_model, pacienteDiagnostico
 from .crud_diagnosticos import CrudDiagnostico
+from flask import jsonify
+from app.models.entities.Historial import Historial
+from database.db import get_connection
 #random para prediccion res
 import random
 
@@ -38,7 +41,26 @@ class PruebasPredicciones(Resource):
         }
         return respuesta, 200
     
-
+@ns.route('/historial/<int:id>')
+class PruebaHistorial(Resource):
+    def get(self,id):
+        try:
+           connection=get_connection()
+           with connection.cursor() as cursor:
+                cursor.execute(f'SELECT id, fecha, hora, estudio, descripcion FROM public."Historial" WHERE id=%s;',(id,))
+                row = cursor.fetchone()
+        
+                if row != None:
+                    historial= Historial(row[0], row[1], row[2], row[3], row[4])
+                    connection.close()
+                    
+                    if historial != None:
+                        return jsonify(historial.to_JSON())
+                    return jsonify({"message": 'Historial no encontrado'})
+                else: 
+                    return jsonify({"message": 'Historial no encontrado'})       
+        except Exception as ex:
+            return jsonify({"message": str(ex)}),500
 
 @ns2.route("/all")
 class DiagnosticoListResource(Resource):
