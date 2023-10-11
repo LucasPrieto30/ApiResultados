@@ -1,1 +1,1 @@
-[]
+[{"id": 1, "UsuarioId": "string", "Edad": 0, "Peso": 0, "AlturaCM": 0, "Sexo": "string", "SeccionCuerpo": "string", "CondicionesPrevias": "string", "Imagen": "string"}, {"id": 2, "UsuarioId": "string", "Edad": 0, "Peso": 0, "AlturaCM": 0, "Sexo": "string", "SeccionCuerpo": "string", "CondicionesPrevias": "string", "Imagen": "string"}, {"id": 3, "UsuarioId": "string", "Edad": 0, "Peso": 0, "AlturaCM": 0, "Sexo": "string", "SeccionCuerpo": "string", "CondicionesPrevias": "string", "Imagen": "string"}]

@@ -7,6 +7,6 @@ def get_connection():
                                 user='mica',
                                 password=1234,
                                 database='pruebas',
-                                port='18113')
+                                port='15360')
     except DatabaseError as ex:
         raise ex

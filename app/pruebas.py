@@ -100,11 +100,12 @@ class DiagnosticoCreate(Resource):
 
 
 
-@ns2.route("/deleteAll")
+@ns2.route("/Delete/<int:id_diagnostico>")
 class DiagnosticoDeleteResource(Resource):
-    def delete(self):
+    def delete(self,id_diagnostico):
         #diagnostico = crud.resetear_diagnosticos()
-        if crud.resetear_diagnosticos():
-            return {"message": "Diagnósticos eliminados correctamente"}, 200
+        if crud.eliminar_diagnostico(id_diagnostico):
+            return {"message": "Diagnóstico eliminado correctamente"}, 200
         else:
-            return {"error": "No se pudieron eliminar los diagnósticos"}, 500
+            return {"error": "No se pudo eliminar el diagnóstico"}, 500
+        

@@ -1,4 +1,5 @@
 import json
+from database.dto_diagnostico import insert_diagnostico, obtener_diagnostico, obtener_todos_diagnosticos, eliminar_diagnostico
 
 class CrudDiagnostico:
     def __init__(self):
@@ -21,31 +22,36 @@ class CrudDiagnostico:
             "CondicionesPrevias": datos_diagnostico.get("CondicionesPrevias"),
             "Imagen": datos_diagnostico.get("Imagen")
         }
-        nuevo_diagnostico = {"id": len(self.diagnosticos) + 1, **datos_diagnostico}
-        self.diagnosticos.append(nuevo_diagnostico)
-        self.guardar_diagnosticos_en_json()
-        return nuevo_diagnostico
+        if insert_diagnostico(nuevo_diagnostico):
+            return nuevo_diagnostico
+        else:
+            return False
+        #nuevo_diagnostico = {"id": len(self.diagnosticos) + 1, **datos_diagnostico}
+        #self.diagnosticos.append(nuevo_diagnostico)
+        #self.guardar_diagnosticos_en_json()
+       
 
     def obtener_diagnostico(self, id_diagnostico):
         # Lógica para obtener un diagnóstico de la lista por su ID
-        for diagnostico in self.diagnosticos:
-            if diagnostico["id"] == id_diagnostico:
+        #for diagnostico in self.diagnosticos:
+         #   if diagnostico["id"] == id_diagnostico:
                 # Obtener el UsuarioId y el ID_rol correspondientes al diagnóstico
-                UsuarioId = diagnostico.get("UsuarioId")
-                ID_rol = diagnostico.get("ID_rol")
-
+          #      UsuarioId = diagnostico.get("UsuarioId")
+           #     ID_rol = diagnostico.get("ID_rol")
+        diagnostico  = obtener_diagnostico(id_diagnostico)
+        if diagnostico:
                 datos_diagnostico = {
-                    "id": diagnostico.get("id"),
-                    "UsuarioId": UsuarioId,
-                    "ID_rol": ID_rol,
+                    "id": diagnostico["id_diagnostico"],
+                    "UsuarioId": diagnostico["UsuarioId"],
+                    "Id_rol":"null",
                     "diagnostico/resultados": {
-                        "Edad": diagnostico.get("Edad"),
-                        "Peso": diagnostico.get("Peso"),
-                        "AlturaCM": diagnostico.get("AlturaCM"),
-                        "Sexo": diagnostico.get("Sexo"),
-                        "SeccionCuerpo": diagnostico.get("SeccionCuerpo"),
-                        "CondicionesPrevias": diagnostico.get("CondicionesPrevias"),
-                        "Imagen": diagnostico.get("Imagen")
+                        "Edad": diagnostico["Edad"],
+                        "Peso": diagnostico["Peso"],
+                        "AlturaCM": diagnostico["AlturaCM"],
+                        "Sexo": diagnostico["Sexo"],
+                        "SeccionCuerpo": diagnostico["SeccionCuerpo"],
+                        "CondicionesPrevias": diagnostico["CondicionesPrevias"],
+                        "Imagen": diagnostico["Imagen"]
                     }
                 }
                 return datos_diagnostico
@@ -64,33 +70,28 @@ class CrudDiagnostico:
     ## si se pide a futuro
     def eliminar_diagnostico(self, id_diagnostico):
         # Lógica para eliminar un diagnóstico de la lista por su ID
-        for diagnostico in self.diagnosticos:
-            if diagnostico["id"] == id_diagnostico:
-                self.diagnosticos.remove(diagnostico)
-                #self.guardar_diagnosticos_en_json()
-
-                return True
-        return False
+        if eliminar_diagnostico(id_diagnostico):
+            #self.guardar_diagnosticos_en_json()
+            return True
+        else:
+            return False
 
     def mostrar_diagnosticos(self):
         lista_diagnosticos = []
-        for diagnostico in self.diagnosticos:
-            # Obtener el UsuarioId y el ID_rol correspondientes al diagnóstico
-            UsuarioId = diagnostico.get("UsuarioId")
-            ID_rol = diagnostico.get("ID_rol")
-
+        todos_diagnosticos = obtener_todos_diagnosticos()
+        for diagnostico in todos_diagnosticos:
             datos_diagnostico = {
-                "id": diagnostico.get("id"),
-                "UsuarioId": UsuarioId,
-                "ID_rol": ID_rol,
-                "diagnostico/resultados": {
-                    "Edad": diagnostico.get("Edad"),
-                    "Peso": diagnostico.get("Peso"),
-                    "AlturaCM": diagnostico.get("AlturaCM"),
-                    "Sexo": diagnostico.get("Sexo"),
-                    "SeccionCuerpo": diagnostico.get("SeccionCuerpo"),
-                    "CondicionesPrevias": diagnostico.get("CondicionesPrevias"),
-                    "Imagen": diagnostico.get("Imagen")
+            "id": diagnostico["id_diagnostico"],
+            "UsuarioId": diagnostico["UsuarioId"],
+            "Id_rol": "null",  # Puedes adaptar este valor si es necesario
+            "diagnostico/resultados": {
+                "Edad": diagnostico["Edad"],
+                "Peso": diagnostico["Peso"],
+                "AlturaCM": diagnostico["AlturaCM"],
+                "Sexo": diagnostico["Sexo"],
+                "SeccionCuerpo": diagnostico["SeccionCuerpo"],
+                "CondicionesPrevias": diagnostico["CondicionesPrevias"],
+                "Imagen": diagnostico["Imagen"]
                 }
             }
             lista_diagnosticos.append(datos_diagnostico)
