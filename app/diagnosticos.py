@@ -6,6 +6,8 @@ from app.models.entities.Historial import Historial
 from database.db import get_connection
 from werkzeug.utils import secure_filename
 import os
+from psycopg2 import Binary
+import requests
 #random para prediccion res
 import random
 
@@ -32,7 +34,7 @@ class Pruebas(Resource):
     def get(self):
         return {"saludo": "hola get"}, 200
     
-@ns.route("/predicciones")
+@ns.route("/prediccion")
 class PruebasPredicciones(Resource):
     def get(self):
         numeroPrediccion = round(random.uniform(0.00, 1.00), 2)
@@ -50,7 +52,7 @@ class PruebasPredicciones(Resource):
         }
         return respuesta, 200
     
-@ns.route('/historial/<int:id>')
+@ns2.route('/historial/<int:id>')
 class PruebaHistorial(Resource):
     def get(self,id):
         try:
@@ -71,23 +73,48 @@ class PruebaHistorial(Resource):
         except Exception as ex:
             return jsonify({"message": str(ex)}),500
         
-@ns.route('/cargar-imagen')
+@ns2.route('/predecir/cerebro')
 class PruebaImagen(Resource):
     @ns.expect(post_model2)
     def post(self):
-        try:
-            if 'img' not in request.files:
-                return {'error': 'No se adjuntó ningún archivo'}, 400
-            
-            img = request.files['img']
-            if allowed_file(img.filename):
-                filename = secure_filename(img.filename)
-                img.save(os.path.join('app/static', filename)) # la imagen se guarda en la carpeta 'static'
-                return {'message': 'Imagen cargada exitosamente'}
-            else:
-                return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
-        except Exception as ex:
-            return {'message': str(ex)}, 500
+        if 'img' not in request.files:
+            return {'error': 'No se adjuntó ningún archivo'}, 400
+        
+        img = request.files['img']
+
+        if img.filename == '':
+            return {'error': 'Nombre de archivo vacío'}, 400
+    
+        if img and allowed_file(img.filename):
+            filename = secure_filename(img.filename)
+            img.save(os.path.join('app/static', filename)) # la imagen se guarda en la carpeta 'static'
+
+            try:
+                # URL de la API externa a la que deseas enviar la imagen
+                url = 'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/brain'
+
+                # Leer la imagen en formato binario
+                with open(os.path.join('app/static', filename), 'rb') as file:
+                    image_data = file.read()
+
+                # Crear un diccionario con los datos que deseas enviar, incluyendo la imagen en binario
+                files = {'image': (filename, image_data, 'image/jpeg')}
+
+                # Realizar la solicitud POST con los datos y la imagen
+                response = requests.post(url, files=files)
+
+                # Procesar la respuesta
+                if response.status_code == 200:
+                    # Si la respuesta es JSON, puedes cargarla como un diccionario
+                    data = response.json()
+                    return {"response": data}, 200
+                else:
+                    return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
+            except Exception as ex:
+                return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
+        else:
+            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+
 
 
 @ns2.route("/all")

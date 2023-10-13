@@ -1,6 +1,6 @@
 from flask import Flask
 from .extensions import api
-from .pruebas import ns, ns2
+from .diagnosticos import ns, ns2
 from flask_cors import CORS
 
 def create_app():
