@@ -14,3 +14,6 @@ pacienteDiagnostico = api.model("pacienteDiagnostico", {
     "CondicionesPrevias": fields.String,
     "Imagen": fields.String
 })
+
+# argumentos para solicitud post, key= img, tipo=file
+post_model2 = api.parser().add_argument('img', location='files', type='file')

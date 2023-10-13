@@ -1,9 +1,11 @@
 from flask_restx import Resource, Namespace, fields
-from .modelos import post_model, pacienteDiagnostico
+from .modelos import post_model, pacienteDiagnostico, post_model2
 from .crud_diagnosticos import CrudDiagnostico
-from flask import jsonify
+from flask import jsonify, request
 from app.models.entities.Historial import Historial
 from database.db import get_connection
+from werkzeug.utils import secure_filename
+import os
 #random para prediccion res
 import random
 
@@ -11,6 +13,13 @@ ns = Namespace("Pruebas")
 ns2 = Namespace("Diagnosticos")
 crud = CrudDiagnostico()
 
+# archivos permitidos
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+
+# recibe el nombre de un archivo y devuelve true si la extensión del archivo 
+# está en el conjunto de extensiones permitidas y false en caso contrario.
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @ns.route("/imagen")
 class Pruebas(Resource):
@@ -61,6 +70,25 @@ class PruebaHistorial(Resource):
                     return jsonify({"message": 'Historial no encontrado'})       
         except Exception as ex:
             return jsonify({"message": str(ex)}),500
+        
+@ns.route('/cargar-imagen')
+class PruebaImagen(Resource):
+    @ns.expect(post_model2)
+    def post(self):
+        try:
+            if 'img' not in request.files:
+                return {'error': 'No se adjuntó ningún archivo'}, 400
+            
+            img = request.files['img']
+            if allowed_file(img.filename):
+                filename = secure_filename(img.filename)
+                img.save(os.path.join('app/static', filename)) # la imagen se guarda en la carpeta 'static'
+                return {'message': 'Imagen cargada exitosamente'}
+            else:
+                return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+        except Exception as ex:
+            return {'message': str(ex)}, 500
+
 
 @ns2.route("/all")
 class DiagnosticoListResource(Resource):
