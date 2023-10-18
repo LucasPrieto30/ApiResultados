@@ -3,12 +3,13 @@ from psycopg2 import DatabaseError
 import os
 
 def get_connection():
-    password_bb = os.getenv('password_bb')
-    usuario_bb = os.getenv('usuario_bb')
+    password_bbdd = os.getenv('password_bbdd')
+    usuario_bbdd = os.environ.get('usuario_bbdd')
+
     try:
         return psycopg2.connect(host='0.tcp.sa.ngrok.io',
-                                user=usuario_bb,
-                                password=password_bb,
+                                user=usuario_bbdd,
+                                password=password_bbdd,
                                 database='pruebas',
                                 port='14208')
     except DatabaseError as ex:
