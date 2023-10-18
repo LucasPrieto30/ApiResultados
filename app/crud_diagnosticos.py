@@ -44,7 +44,7 @@ class CrudDiagnostico:
                     "id": diagnostico["id_diagnostico"],
                     "UsuarioId": diagnostico["UsuarioId"],
                     "Id_rol":"null",
-                    "diagnostico/resultados": {
+                    "diagnostico": {
                         "Edad": diagnostico["Edad"],
                         "Peso": diagnostico["Peso"],
                         "AlturaCM": diagnostico["AlturaCM"],
