@@ -1,10 +1,10 @@
 
+import base64
 from database.db import get_connection
 from psycopg2.extras import RealDictCursor
 
 # insertar diagnostico de modelo: cerebro
 def insert_diagnostico(datos_diagnostico):
-   
     try:
         connection = get_connection()
         cursor = connection.cursor()
@@ -35,31 +35,24 @@ def obtener_diagnostico(id_diagnostico):
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT id_diagnostico, UsuarioId, Edad, Peso, AlturaCM, Sexo, SeccionCuerpo, CondicionesPrevias, Imagen FROM Diagnostico WHERE id_diagnostico=%s;', (id_diagnostico,))
+            cursor.execute(f'SELECT id, imagen, datos_complementarios, fecha, resultado, usuario_id, usuario_medico_id, modelo_id FROM Diagnostico WHERE id=%s;', (id_diagnostico,))
             row = cursor.fetchone()
 
             if row is not None:
-                Peso_decimal = row[3]
-                AlturaCM_decimal = row[4]
-                Peso_float = float(Peso_decimal)
-                AlturaCM_float = float(AlturaCM_decimal)
-
                 diagnostico = {
-                    "id_diagnostico": row[0],
-                    "UsuarioId": row[1],
-                    "Edad": row[2],
-                    "Peso": Peso_float,
-                    "AlturaCM": AlturaCM_float,
-                    "Sexo": row[5],
-                    "SeccionCuerpo": row[6],
-                    "CondicionesPrevias": row[7],
-                    "Imagen": row[8]
+                     "id": row[0],  
+                    "imagen": base64.b64encode(row[1]).decode('utf-8'),
+                    "datos_complementarios": row[2],
+                    "fecha": row[3].strftime("%d-%m-%Y"),
+                    "resultado": row[4],
+                    "usuario_id": row[5],
+                    "usuario_medico_id": row[6],
+                    "modelo_id": row[7]
                 }
-                connection.close()
+            connection.close()
             
-                if diagnostico is not None:
-                    return diagnostico
-                return None
+            if diagnostico is not None:
+                return diagnostico
             else:
                 return None
     except Exception as ex:

@@ -52,30 +52,11 @@ class CrudDiagnostico:
        
 
     def obtener_diagnostico(self, id_diagnostico):
-        # Lógica para obtener un diagnóstico de la lista por su ID
-        #for diagnostico in self.diagnosticos:
-         #   if diagnostico["id"] == id_diagnostico:
-                # Obtener el UsuarioId y el ID_rol correspondientes al diagnóstico
-          #      UsuarioId = diagnostico.get("UsuarioId")
-           #     ID_rol = diagnostico.get("ID_rol")
-        diagnostico  = obtener_diagnostico(id_diagnostico)
-        if diagnostico:
-                datos_diagnostico = {
-                    "id": diagnostico["id_diagnostico"],
-                    "UsuarioId": diagnostico["UsuarioId"],
-                    "Id_rol":"null",
-                    "diagnostico": {
-                        "Edad": diagnostico["Edad"],
-                        "Peso": diagnostico["Peso"],
-                        "AlturaCM": diagnostico["AlturaCM"],
-                        "Sexo": diagnostico["Sexo"],
-                        "SeccionCuerpo": diagnostico["SeccionCuerpo"],
-                        "CondicionesPrevias": diagnostico["CondicionesPrevias"],
-                        "Imagen": diagnostico["Imagen"]
-                    }
-                }
-                return datos_diagnostico
-        return None
+        try:
+            diagnostico = obtener_diagnostico(id_diagnostico)
+            return diagnostico
+        except Exception as ex:
+            return {'msg': str(ex)}
 
     ## si se pide a futuro
     def actualizar_diagnostico(self, id_diagnostico, nuevos_datos):
