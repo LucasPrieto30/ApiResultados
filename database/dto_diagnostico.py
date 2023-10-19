@@ -6,30 +6,25 @@ from psycopg2.extras import RealDictCursor
 # insertar diagnostico de modelo: cerebro
 def insert_diagnostico(datos_diagnostico):
     try:
-        connection = get_connection()
-        cursor = connection.cursor()
-        insert_query = """
-        INSERT INTO public.diagnostico(imagen, datos_complementarios, fecha, resultado, usuario_id, usuario_medico_id, modelo_id)
-	    VALUES ( %s, %s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(insert_query, (
-            datos_diagnostico.get("imagen"),
-            datos_diagnostico.get("datos_complementarios"),
-            datos_diagnostico.get("fecha"),
-            datos_diagnostico.get("resultado"),
-            datos_diagnostico.get("usuario_id"),
-            datos_diagnostico.get("id_medico"),
-            datos_diagnostico.get("id_modelo"),
-        ))
-        connection.commit()
-        return True
+        connection=get_connection()
+        with connection.cursor() as cursor:
+            insert_query = """
+            INSERT INTO public.diagnostico(imagen, datos_complementarios, fecha, resultado, usuario_id, usuario_medico_id, modelo_id)
+            VALUES ( %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(insert_query, (
+                datos_diagnostico.get("imagen"),
+                datos_diagnostico.get("datos_complementarios"),
+                datos_diagnostico.get("fecha"),
+                datos_diagnostico.get("resultado"),
+                datos_diagnostico.get("usuario_id"),
+                datos_diagnostico.get("id_medico"),
+                datos_diagnostico.get("id_modelo"),
+            ))
+            connection.commit()
     except Exception as e:
         connection.rollback()
-        raise e
-        return False
-    finally:
-        cursor.close()
-        connection.close()
+        return {'error': str(e)}
 
 def obtener_diagnostico(id_diagnostico):
     diagnostico = None

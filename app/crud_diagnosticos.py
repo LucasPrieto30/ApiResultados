@@ -12,8 +12,8 @@ class CrudDiagnostico:
         except (FileNotFoundError, json.JSONDecodeError):
             self.diagnosticos = []
 
-    # diagnostico modelo decerebro
-    def crear_diagnostico(self, datos_diagnostico):
+    # diagnostico modelo de cerebro
+    def crear_diagnostico(self, datos_diagnostico, data):
         try:
             # Convertir la imagen a bytes
             img_data = datos_diagnostico['imagen'].read()
@@ -36,28 +36,20 @@ class CrudDiagnostico:
                 "imagen": img_encoded,
                 "datos_complementarios": datos_complementarios_json,
                 "fecha": fecha_actual,
-                "resultado": "ff",  # test (cambiar despues)
+                "resultado": json.dumps(data), 
                 "usuario_id":  datos_diagnostico['id_usuario'], 
                 "id_medico": datos_diagnostico['id_medico'],
-                "id_modelo": 1  # test (cambiar despues)
+                "id_modelo": 1  
             }
            
-            if insert_diagnostico(nuevo_diagnostico):
-                return nuevo_diagnostico
-            else:
-                return False
+            insert_diagnostico(nuevo_diagnostico)
         except Exception as ex:
                 return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
         
        
-
     def obtener_diagnostico(self, id_diagnostico):
-        try:
-            diagnostico = obtener_diagnostico(id_diagnostico)
-            return diagnostico
-        except Exception as ex:
-            return {'msg': str(ex)}
-
+        return obtener_diagnostico(id_diagnostico)
+        
     ## si se pide a futuro
     def actualizar_diagnostico(self, id_diagnostico, nuevos_datos):
         # Lógica para actualizar un diagnóstico en la lista por su ID

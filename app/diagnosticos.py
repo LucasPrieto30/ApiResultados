@@ -120,49 +120,52 @@ class HistorialResource(Resource):
         finally:
             connection.close()
 
-        
 @ns2.route('/predecir/cerebro')
 class PruebaImagen(Resource):
-    @ns.expect(post_model2)
+    @ns.expect(diag_parser)
     def post(self):
-        if 'img' not in request.files:
-            return {'error': 'No se adjuntó ningún archivo'}, 400
-        
-        img = request.files['img']
+        nuevo_diagnostico = diag_parser.parse_args()
 
-        if img.filename == '':
-            return {'error': 'Nombre de archivo vacío'}, 400
-    
-        if img and allowed_file(img.filename):
+        img = request.files['imagen']
+        filename = ""
+        if allowed_file(img.filename):
             filename = secure_filename(img.filename)
-            img.save(os.path.join('app/static', filename)) # la imagen se guarda en la carpeta 'static'
-
-            try:
-                # URL de la API externa a la que deseas enviar la imagen
-                url = 'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/brain'
-                
-                # Leer la imagen en formato binario
-                with open(os.path.join('app/static', filename), 'rb') as file:
-                    image_data = file.read()
-
-                # Crear un diccionario con los datos que deseas enviar, incluyendo la imagen en binario
-                files = {'image': (filename, image_data, 'image/jpeg')}
-
-                # Realizar la solicitud POST con los datos y la imagen
-                response = requests.post(url, files=files)
-
-                # Procesar la respuesta
-                if response.status_code == 200:
-                    # Si la respuesta es JSON, puedes cargarla como un diccionario
-                    data = response.json()
-                    return {"response": data}, 200
-                else:
-                    return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
-            except Exception as ex:
-                return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
+            img.save(os.path.join('app/static', filename))
         else:
             return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
 
+        datos = {
+            'problemasVisuales':nuevo_diagnostico['problemasVisuales'],
+            'decadenciaMotriz':nuevo_diagnostico['decadenciaMotriz'],
+            'epilepsia': nuevo_diagnostico['epilepsia']
+        }
+        
+        try:
+            # URL de la API externa a la que deseas enviar la imagen
+            url = 'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/brain'
+            
+            # Leer la imagen en formato binario
+            with open(os.path.join('app/static', filename), 'rb') as file:
+                image_data = file.read()
+
+            # falta agregar datos complementarios a la request
+            files = {'image': (filename, image_data, 'image/jpeg')}
+
+            # Realizar la solicitud POST con los datos y la imagen
+            response = requests.post(url, files=files) # data= datos
+
+            # Procesar la respuesta
+            if response.status_code == 200:
+                # Si la respuesta es JSON, puedes cargarla como un diccionario
+                data = response.json()
+                # guarda el diagnostico cuando se obtiene el response
+                crud.crear_diagnostico(nuevo_diagnostico, data)
+                return {"response": data}, 200
+            else:
+                return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
+        except Exception as ex:
+            return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
+   
 
 
 @ns2.route("/all")
@@ -200,8 +203,6 @@ class DiagnosticoCreate(Resource):
             return resultado, 201  # Devuelve el diagnóstico creado y el código 201 (Created)
         else:
             return {"error": "No se pudo crear el diagnóstico"}, 500  # En caso de error
-
-
 
 @ns2.route("/Delete/<int:id_diagnostico>")
 class DiagnosticoDeleteResource(Resource):
