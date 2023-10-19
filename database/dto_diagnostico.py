@@ -32,33 +32,36 @@ def insert_diagnostico(datos_diagnostico):
         connection.close()
 
 def obtener_diagnostico(id_diagnostico):
+    diagnostico = None
+
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT id, imagen, datos_complementarios, fecha, resultado, usuario_id, usuario_medico_id, modelo_id FROM Diagnostico WHERE id=%s;', (id_diagnostico,))
+            cursor.execute(f'SELECT d.id, d.imagen, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_id, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_id = me.id WHERE d.id=%s;', (id_diagnostico,))
             row = cursor.fetchone()
 
             if row is not None:
                 diagnostico = {
-                     "id": row[0],  
+                    "id": row[0],  
                     "imagen": base64.b64encode(row[1]).decode('utf-8'),
                     "datos_complementarios": row[2],
                     "fecha": row[3].strftime("%d-%m-%Y"),
                     "resultado": row[4],
                     "usuario_id": row[5],
                     "usuario_medico_id": row[6],
-                    "modelo_id": row[7]
+                    "modelo_id": row[7],
+                    "nombre_usuario": row[8],
+                    "modelo_nombre": row[9],
+                    "nombre_medico": row[10],
                 }
             connection.close()
-            
-            if diagnostico is not None:
-                return diagnostico
-            else:
-                return None
+        if diagnostico:
+            return diagnostico
+        else:
+            return {"message": "Diagnóstico no encontrado"}
     except Exception as ex:
-        raise ex
-        return None
-
+        return {"error" : "Error al obtener el diagnóstico"}, 500
+    
 def obtener_todos_diagnosticos():
     try:
         connection = get_connection()
