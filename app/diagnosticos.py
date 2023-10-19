@@ -1,5 +1,7 @@
+import base64
 from flask_restx import Resource, Namespace, fields
-from .modelos import post_model, pacienteDiagnostico, post_model2
+import psycopg2
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from app.models.entities.Historial import Historial
@@ -73,6 +75,52 @@ class PruebaHistorial(Resource):
         except Exception as ex:
             return jsonify({"message": str(ex)}),500
         
+@ns2.route('/historial')
+class HistorialResource(Resource):
+    @ns.expect(historial_parser)
+    def get(self):
+        args = historial_parser.parse_args()
+
+        id_usuario = args['id_usuario']
+        rol_id = args['rol_id']
+
+        try:
+            connection=get_connection()
+            with connection.cursor() as cursor:
+
+                if rol_id == 4:
+                    # Consulta para médicos
+                    cursor.execute("SELECT * FROM public.diagnostico WHERE usuario_medico_id = %s", (id_usuario,))
+                elif rol_id == 1:
+                    # Consulta para auditores
+                    cursor.execute("SELECT * FROM  public.diagnostico")
+                else:
+                    return {"error": "Rol no válido"}, 400
+
+                historial = cursor.fetchall()
+                cursor.close()
+            
+            # historial según la estructura del response
+            historial_formateado = []
+            for diagnostico in historial:
+                historial_formateado.append({
+                    "id": diagnostico[0],  
+                    "imagen": base64.b64encode(diagnostico[1]).decode('utf-8'),
+                    "datos_complementarios": diagnostico[2],
+                    "fecha": diagnostico[3].strftime("%d-%m-%Y"),
+                    "resultado": diagnostico[4],
+                    "usuario_id": diagnostico[5],
+                    "usuario_medico_id": diagnostico[6],
+                    "modelo_id": diagnostico[7]
+                })
+            return {"historial": historial_formateado}
+        
+        except psycopg2.Error as e:
+            return {"error": "Error al acceder a la base de datos"}, 500
+        finally:
+            connection.close()
+
+        
 @ns2.route('/predecir/cerebro')
 class PruebaImagen(Resource):
     @ns.expect(post_model2)
@@ -92,7 +140,7 @@ class PruebaImagen(Resource):
             try:
                 # URL de la API externa a la que deseas enviar la imagen
                 url = 'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/brain'
-
+                
                 # Leer la imagen en formato binario
                 with open(os.path.join('app/static', filename), 'rb') as file:
                     image_data = file.read()
@@ -139,11 +187,11 @@ class DiagnosticoResource(Resource):
 
 @ns2.route("")
 class DiagnosticoCreate(Resource):
-    @ns.expect(pacienteDiagnostico)
+    @ns.expect(diag_parser)
     @ns2.doc(responses={201: 'Éxito', 500: 'Error al enviar el diagnóstico'})
     def post(self):
         # tener los datos del diagnóstico del cuerpo de la solicitud
-        nuevo_diagnostico = ns.payload
+        nuevo_diagnostico = diag_parser.parse_args()
 
         # Llama al método para crear un diagnóstico en el CRUD
         resultado = crud.crear_diagnostico(nuevo_diagnostico)

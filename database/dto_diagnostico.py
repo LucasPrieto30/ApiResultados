@@ -2,24 +2,24 @@
 from database.db import get_connection
 from psycopg2.extras import RealDictCursor
 
-
+# insertar diagnostico de modelo: cerebro
 def insert_diagnostico(datos_diagnostico):
-    connection = get_connection()
-    cursor = connection.cursor()
+   
     try:
+        connection = get_connection()
+        cursor = connection.cursor()
         insert_query = """
-        INSERT INTO Diagnostico (UsuarioId, Edad, Peso, AlturaCM, Sexo, SeccionCuerpo, CondicionesPrevias, Imagen)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO public.diagnostico(imagen, datos_complementarios, fecha, resultado, usuario_id, usuario_medico_id, modelo_id)
+	    VALUES ( %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (
-            datos_diagnostico.get("UsuarioId"),
-            int(datos_diagnostico.get("Edad")),
-            float(datos_diagnostico.get("Peso")),
-            float(datos_diagnostico.get("AlturaCM")),
-            datos_diagnostico.get("Sexo"),
-            datos_diagnostico.get("SeccionCuerpo"),
-            datos_diagnostico.get("CondicionesPrevias"),
-            datos_diagnostico.get("Imagen")
+            datos_diagnostico.get("imagen"),
+            datos_diagnostico.get("datos_complementarios"),
+            datos_diagnostico.get("fecha"),
+            datos_diagnostico.get("resultado"),
+            datos_diagnostico.get("usuario_id"),
+            datos_diagnostico.get("id_medico"),
+            datos_diagnostico.get("id_modelo"),
         ))
         connection.commit()
         return True

@@ -1,3 +1,5 @@
+import base64
+import datetime
 import json
 from database.dto_diagnostico import insert_diagnostico, obtener_diagnostico, obtener_todos_diagnosticos, eliminar_diagnostico
 
@@ -10,25 +12,43 @@ class CrudDiagnostico:
         except (FileNotFoundError, json.JSONDecodeError):
             self.diagnosticos = []
 
+    # diagnostico modelo decerebro
     def crear_diagnostico(self, datos_diagnostico):
-        # Lógica para crear un diagnóstico y agregarlo a la lista
-        nuevo_diagnostico = {
-            "UsuarioId": datos_diagnostico.get("UsuarioId"),
-            "Edad": datos_diagnostico.get("Edad"),
-            "Peso": datos_diagnostico.get("Peso"),
-            "AlturaCM": datos_diagnostico.get("AlturaCM"),
-            "Sexo": datos_diagnostico.get("Sexo"),
-            "SeccionCuerpo": datos_diagnostico.get("SeccionCuerpo"),
-            "CondicionesPrevias": datos_diagnostico.get("CondicionesPrevias"),
-            "Imagen": datos_diagnostico.get("Imagen")
-        }
-        if insert_diagnostico(nuevo_diagnostico):
-            return nuevo_diagnostico
-        else:
-            return False
-        #nuevo_diagnostico = {"id": len(self.diagnosticos) + 1, **datos_diagnostico}
-        #self.diagnosticos.append(nuevo_diagnostico)
-        #self.guardar_diagnosticos_en_json()
+        try:
+            # Convertir la imagen a bytes
+            img_data = datos_diagnostico['imagen'].read()
+            img_encoded = base64.b64encode(img_data)
+
+            datos_complementarios = {
+                'problemasVisuales':datos_diagnostico['problemasVisuales'],
+                'decadenciaMotriz': datos_diagnostico['decadenciaMotriz'],
+                'epilepsia': datos_diagnostico['epilepsia']
+            }
+
+            # Convertir el diccionario a formato JSON
+            datos_complementarios_json = json.dumps(datos_complementarios)
+
+            # Obtener la fecha actual
+            fecha_actual = datetime.datetime.now()
+
+            # crear un diagnóstico con los datos
+            nuevo_diagnostico = {
+                "imagen": img_encoded,
+                "datos_complementarios": datos_complementarios_json,
+                "fecha": fecha_actual,
+                "resultado": "ff",  # test (cambiar despues)
+                "usuario_id":  datos_diagnostico['id_usuario'], 
+                "id_medico": datos_diagnostico['id_medico'],
+                "id_modelo": 1  # test (cambiar despues)
+            }
+           
+            if insert_diagnostico(nuevo_diagnostico):
+                return nuevo_diagnostico
+            else:
+                return False
+        except Exception as ex:
+                return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
+        
        
 
     def obtener_diagnostico(self, id_diagnostico):
