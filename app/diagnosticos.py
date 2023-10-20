@@ -218,16 +218,16 @@ from flask import send_file
 import io 
 from PIL import Image
 
-@ns.route('/imagen/<int:imagen_id>')
+@ns.route('/imagen/<int:diagnostico_id>')
 class Imagen(Resource):
-    def get(self, imagen_id):
+    def get(self, diagnostico_id):
         # Realizar una conexión a la base de datos
         connection = get_connection()
         cursor = connection.cursor()
 
         try:
             # Realizar una consulta para obtener la imagen
-            cursor.execute("SELECT imagen FROM diagnostico WHERE id = %s", (imagen_id,))
+            cursor.execute("SELECT imagen FROM diagnostico WHERE id = %s", (diagnostico_id,))
             imagen = cursor.fetchone()
 
             if imagen:
