@@ -201,3 +201,69 @@ class DiagnosticoDeleteResource(Resource):
         else:
             return {"error": "No se pudo eliminar el diagnóstico"}, 500
         
+
+# extraer los datos binarios codificados en base64 
+#datos_binarios_base64 = json_respuesta['imagen']
+
+# decodificar los datos binarios base64
+#datos_binarios = base64.b64decode(datos_binarios_base64)
+
+# crear una imagen a partir de los datos binarios
+#imagen = Image.open(io.BytesIO(datos_binarios))
+
+# mostrar la imagen
+#imagen.show()
+
+from flask import send_file
+import io 
+from PIL import Image
+
+@ns.route('/imagen/<int:imagen_id>')
+class Imagen(Resource):
+    def get(self, imagen_id):
+        # Realizar una conexión a la base de datos
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        try:
+            # Realizar una consulta para obtener la imagen
+            cursor.execute("SELECT imagen FROM diagnostico WHERE id = %s", (imagen_id,))
+            imagen = cursor.fetchone()
+
+            if imagen:
+                # Obtener los datos de la imagen (de tipo bytea) desde la consulta
+                datos_binarios_base64 = imagen[0]
+                #imagen_bytes = imagen[0]
+                #print(imagen_bytes)
+                cadena_decodificada = base64.b64decode(datos_binarios_base64)
+
+                if isinstance(cadena_decodificada, bytes):
+                    print("esta en bytes")
+                # Intenta abrir la imagen usando Pillow
+                try:
+                    image = Image.open(io.BytesIO(cadena_decodificada))
+
+                    # Ahora puedes obtener el formato de la imagen
+                    image_format = image.format.lower()  # Convierte a minúsculas para uniformidad
+
+                    # Determina el mimetype basado en el formato de la imagen
+                    if image_format == "jpeg":
+                        mimetype = "image/jpeg"
+                    elif image_format == "png":
+                        mimetype = "image/png"
+                    elif image_format == "gif":
+                        mimetype = "image/gif"
+                    # Agrega otros formatos si es necesario
+
+                    # Devuelve la imagen con el mimetype correcto
+                    return send_file(io.BytesIO(cadena_decodificada), mimetype=mimetype)
+                except Exception as e:
+        # Si no se puede abrir la imagen, maneja el error
+                    return {"error": "Error al abrir la imagen: " + str(e)}, 500
+            else:
+                return {"message": "Imagen no encontrada"}, 404
+        except Exception as e:
+            return {"error": "Error al obtener la imagen: " + str(e)}, 500
+        finally:
+            cursor.close()
+            connection.close()
