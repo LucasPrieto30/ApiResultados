@@ -52,3 +52,52 @@ class MedicoCreate(Resource):
                 return resultado, 201  # Devuelve el médico creado y el código 201 (Created)
             else:
                 return {"error": resultado.get("message", "No se pudo crear el médico")}, 500  # En caso de error
+
+@ns_usuarios.route("/<int:id>")
+class Medico(Resource):
+    #@ns_usuarios.expect(parser)
+    @ns_usuarios.doc(responses={200: 'Éxito', 401: 'Acceso no autorizado', 404: 'Médico no encontrado'})
+    def get(self, id):
+        #args = parser.parse_args()  # Analiza los argumentos de la solicitud
+        # Obtén el ID y la clave de los argumentos
+        medico_id = id
+        #clave = args['clave'].encode('utf-8')
+        #clave_ingresada = clave.encode('utf-8')
+        #CLAVE_REQUERIDA_str = CLAVE_REQUERIDA.decode('utf-8')
+        #CLAVE_REQUERIDA_str = CLAVE_REQUERIDA.decode('utf-8')
+        #print(clave)
+        #print(CLAVE_REQUERIDA)
+        #if isinstance(clave, bytes):
+    # La clave se ha guardado como bytes
+         #   print("La clave maestra es de tipo bytes.",clave)
+        #Obtén la clave proporcionada por el usuario desde los parámetros de consulta
+        #clave = ns.payload.get('clave')  # Obtén la clave de la solicitud GET
+        # Verifica si la clave proporcionada coincide con la clave requerida
+        #if clave != CLAVE_REQUERIDA:
+         #   return {"error": "Acceso no autorizado"}, 401  # Devuelve un error 401 (No autorizado) si la clave no coincide
+        # Realiza una consulta en la base de datos para obtener los datos del médico con el ID proporcionado (id)
+        medico = crud2.consultar_medico_por_id(medico_id)
+        if medico:
+            try:
+                response = {
+                "success": True,
+                "medico": medico
+                }
+                return response ,200
+            except Exception as e:
+                response = {
+                    "success": False,
+                    "message": "Error al desencriptar el correo: " + str(e)
+                }
+            return response, 500  # Devuelve una respuesta de error con el código 500 en caso de error de desencriptación
+        else:
+            # Descifra el correo y la contraseña antes de mostrarlos
+            #medico['correo_electronico'] = crud2.descifrar_valor(medico['correo_electronico'],clave)
+            #medico['contrasena'] = crud2.descifrar_valor(medico['contrasena'],clave)
+            #return medico, 200  # Devuelve los datos del médico y el código 200 (OK)
+            response = {
+            "success": True,
+            "message": "No se encontró ningún médico con ese ID"
+            }
+
+            return response, 404  # Devuelve un error 404 si el médico no se encuentra
