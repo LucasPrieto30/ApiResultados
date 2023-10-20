@@ -130,8 +130,9 @@ class PruebaImagen(Resource):
         nuevo_diagnostico["problemasVisuales"] = request.values.get('problemasVisuales').lower() == 'true' 
 
         img = request.files['imagen']
+       
         filename = ""
-        if allowed_file(img.filename):
+        if img and allowed_file(img.filename):
             filename = secure_filename(img.filename)
             img.save(os.path.join('app/static', filename))
         else:
@@ -150,7 +151,7 @@ class PruebaImagen(Resource):
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
                 image_data = file.read()
-
+            
             # falta agregar datos complementarios a la request
             files = {'image': (filename, image_data, 'image/jpeg')}
 
@@ -162,7 +163,7 @@ class PruebaImagen(Resource):
                 # Si la respuesta es JSON, puedes cargarla como un diccionario
                 data = response.json()
                 # guarda el diagnostico cuando se obtiene el response
-                crud.crear_diagnostico(nuevo_diagnostico, data)
+                crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
                 return {"response": data}, 200
             else:
                 return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500

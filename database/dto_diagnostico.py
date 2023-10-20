@@ -33,12 +33,16 @@ def obtener_diagnostico(id_diagnostico):
         connection = get_connection()
         with connection.cursor() as cursor:
             cursor.execute(f'SELECT d.id, d.imagen, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_id, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_id = me.id WHERE d.id=%s;', (id_diagnostico,))
+            
             row = cursor.fetchone()
+
+            imagen_decodificada =  base64.b64decode(row[1])
+            imagen_base64 = base64.b64encode(imagen_decodificada).decode('utf-8')
 
             if row is not None:
                 diagnostico = {
                     "id": row[0],  
-                    "imagen": base64.b64encode(row[1]).decode('utf-8'),
+                    "imagen": imagen_base64,
                     "datos_complementarios": row[2],
                     "fecha": row[3].strftime("%d-%m-%Y"),
                     "resultado": row[4],

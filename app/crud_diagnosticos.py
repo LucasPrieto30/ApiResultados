@@ -1,6 +1,8 @@
 import base64
 import datetime
 import json
+
+import psycopg2
 from database.dto_diagnostico import insert_diagnostico, obtener_diagnostico, obtener_todos_diagnosticos, eliminar_diagnostico
 from psycopg2 import Binary
 
@@ -14,11 +16,10 @@ class CrudDiagnostico:
             self.diagnosticos = []
 
     # diagnostico modelo de cerebro
-    def crear_diagnostico(self, datos_diagnostico, data):
+    def crear_diagnostico(self, datos_diagnostico, data, img_data):
         try:
-            # Convertir la imagen a bytes
-            img_data = datos_diagnostico['imagen'].read()
-            img_encoded = base64.b64encode(img_data)
+            
+            img_encoded = base64.b64encode(img_data).decode('utf-8')
 
             datos_complementarios = {
                 'problemasVisuales': datos_diagnostico['problemasVisuales'],
