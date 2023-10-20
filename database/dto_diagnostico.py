@@ -101,7 +101,7 @@ def eliminar_diagnostico(id_diagnostico):
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM Diagnostico WHERE id_diagnostico = %s;", (id_diagnostico,))
+            cursor.execute("DELETE FROM Diagnostico WHERE id = %s;", (id_diagnostico,))
             connection.commit()
             connection.close()
             return True

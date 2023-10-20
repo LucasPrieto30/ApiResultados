@@ -54,7 +54,7 @@ class PruebasPredicciones(Resource):
         }
         return respuesta, 200
     
-@ns2.route('/historial/<int:id>')
+@ns.route('/historial/<int:id>')
 class PruebaHistorial(Resource):
     def get(self,id):
         try:
@@ -168,7 +168,7 @@ class PruebaImagen(Resource):
    
 
 
-@ns2.route("/all")
+@ns.route("/all")
 class DiagnosticoListResource(Resource):
     @ns2.doc(responses={200: 'Éxito', 204: 'No hay diagnósticos para mostrar'})
     def get(self):
@@ -188,7 +188,7 @@ class DiagnosticoResource(Resource):
         else:
              return {"message": "No existe diagnóstico con id" + str(id_diagnostico)}, 204
 
-@ns2.route("")
+@ns.route("")
 class DiagnosticoCreate(Resource):
     @ns.expect(diag_parser)
     @ns2.doc(responses={201: 'Éxito', 500: 'Error al enviar el diagnóstico'})
