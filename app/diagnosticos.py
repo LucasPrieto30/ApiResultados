@@ -163,7 +163,7 @@ class PruebaImagen(Resource):
                 data = response.json()
                 # guarda el diagnostico cuando se obtiene el response
                 crud.crear_diagnostico(nuevo_diagnostico, data)
-                return {"response": data}, 200
+                return data, 200
             else:
                 return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
         except Exception as ex:
