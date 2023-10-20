@@ -3,7 +3,6 @@ from database.dto_medico import insert_medico, consultar_medico_id
 class CrudMedico:
     def crear_medico(self, datos_medico):
         nuevo_medico = {
-            "id": datos_medico.get("id"),
             "nombre": datos_medico.get("nombre"),
             "dni": datos_medico.get("dni"),
             "email": datos_medico.get("email"),

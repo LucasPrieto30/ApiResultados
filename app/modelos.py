@@ -37,13 +37,12 @@ diag_parser.add_argument('id_medico', type=int, required=True, help='ID de médi
 from datetime import datetime
 
 post_medico = api.model("PostMedico", {
-    "id": fields.Integer(required=True),
     "nombre": fields.String(required=True),
     "dni": fields.String(required=True),  # Agrega el campo "dni" si es necesario
     "email": fields.String(attribute="email", required=True),
     "password": fields.String(required=True),
-    "rol_id": fields.Integer(required=True),  # Agrega el campo "rol_id" si es necesario
-    "establecimiento_id": fields.Integer(required=True),  # Agrega el campo "establecimiento_id" si es necesario
+    "rol_id": fields.Integer(required=False),  # Agrega el campo "rol_id" si es necesario
+    "establecimiento_id": fields.Integer(required=False),  # Agrega el campo "establecimiento_id" si es necesario
     "fecha_ultima_password": fields.DateTime(attribute="fecha_ultima_password", dt_format='iso8601'),
     "especialidad": fields.String(required=True)
 })
