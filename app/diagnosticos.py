@@ -1,5 +1,5 @@
 import base64
-from flask_restx import Resource, Namespace, fields
+from flask_restx import Resource, Namespace, fields, api
 import psycopg2
 from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser
 from .crud_diagnosticos import CrudDiagnostico
@@ -125,6 +125,9 @@ class PruebaImagen(Resource):
     @ns.expect(diag_parser)
     def post(self):
         nuevo_diagnostico = diag_parser.parse_args()
+        nuevo_diagnostico["decadenciaMotriz"] = request.values.get('decadenciaMotriz').lower() == 'true' 
+        nuevo_diagnostico["epilepsia"] = request.values.get('epilepsia').lower() == 'true' 
+        nuevo_diagnostico["problemasVisuales"] = request.values.get('problemasVisuales').lower() == 'true' 
 
         img = request.files['imagen']
         filename = ""
@@ -139,7 +142,7 @@ class PruebaImagen(Resource):
             'decadenciaMotriz':nuevo_diagnostico['decadenciaMotriz'],
             'epilepsia': nuevo_diagnostico['epilepsia']
         }
-        
+
         try:
             # URL de la API externa a la que deseas enviar la imagen
             url = 'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/brain'
@@ -165,7 +168,7 @@ class PruebaImagen(Resource):
                 return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
         except Exception as ex:
             return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
-   
+
 
 
 @ns.route("/all")
@@ -187,22 +190,6 @@ class DiagnosticoResource(Resource):
             return diagnostico, 200
         else:
              return {"message": "No existe diagnóstico con id" + str(id_diagnostico)}, 204
-
-@ns.route("")
-class DiagnosticoCreate(Resource):
-    @ns.expect(diag_parser)
-    @ns2.doc(responses={201: 'Éxito', 500: 'Error al enviar el diagnóstico'})
-    def post(self):
-        # tener los datos del diagnóstico del cuerpo de la solicitud
-        nuevo_diagnostico = diag_parser.parse_args()
-
-        # Llama al método para crear un diagnóstico en el CRUD
-        resultado = crud.crear_diagnostico(nuevo_diagnostico)
-
-        if resultado:
-            return resultado, 201  # Devuelve el diagnóstico creado y el código 201 (Created)
-        else:
-            return {"error": "No se pudo crear el diagnóstico"}, 500  # En caso de error
 
 @ns2.route("/Delete/<int:id_diagnostico>")
 class DiagnosticoDeleteResource(Resource):

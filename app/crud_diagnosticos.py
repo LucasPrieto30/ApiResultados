@@ -2,6 +2,7 @@ import base64
 import datetime
 import json
 from database.dto_diagnostico import insert_diagnostico, obtener_diagnostico, obtener_todos_diagnosticos, eliminar_diagnostico
+from psycopg2 import Binary
 
 class CrudDiagnostico:
     def __init__(self):
@@ -20,7 +21,7 @@ class CrudDiagnostico:
             img_encoded = base64.b64encode(img_data)
 
             datos_complementarios = {
-                'problemasVisuales':datos_diagnostico['problemasVisuales'],
+                'problemasVisuales': datos_diagnostico['problemasVisuales'],
                 'decadenciaMotriz': datos_diagnostico['decadenciaMotriz'],
                 'epilepsia': datos_diagnostico['epilepsia']
             }
@@ -29,8 +30,7 @@ class CrudDiagnostico:
             datos_complementarios_json = json.dumps(datos_complementarios)
 
             # Obtener la fecha actual
-            fecha_actual = datetime.datetime.now()
-
+            fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             # crear un diagnóstico con los datos
             nuevo_diagnostico = {
                 "imagen": img_encoded,
@@ -41,7 +41,7 @@ class CrudDiagnostico:
                 "id_medico": datos_diagnostico['id_medico'],
                 "id_modelo": 1  
             }
-           
+
             insert_diagnostico(nuevo_diagnostico)
         except Exception as ex:
                 return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
