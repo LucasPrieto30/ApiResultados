@@ -27,9 +27,9 @@ historial_parser.add_argument('rol_id', type=int, required=True, help='Rol ID')
 # parametros para diagnostico del modelo: cerebro
 diag_parser = reqparse.RequestParser()
 diag_parser.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
-diag_parser.add_argument('problemasVisuales', type=bool, required=True, help='Problemas visuales')
-diag_parser.add_argument('decadenciaMotriz', type=bool, required=True, help='Decadencia motriz')
-diag_parser.add_argument('epilepsia', type=bool, required=True, help='Epilepsia')
+diag_parser.add_argument('perdida_visual', type=bool, required=True, help='Pérdida visual')
+diag_parser.add_argument('debilidad_focal', type=bool, required=True, help='debilidad_focal')
+diag_parser.add_argument('convulsiones', type=bool, required=True, help='Convulsiones')
 diag_parser.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
 diag_parser.add_argument('id_medico', type=int, required=True, help='ID de médico')
 

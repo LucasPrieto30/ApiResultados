@@ -125,9 +125,9 @@ class PruebaImagen(Resource):
     @ns.expect(diag_parser)
     def post(self):
         nuevo_diagnostico = diag_parser.parse_args()
-        nuevo_diagnostico["decadenciaMotriz"] = request.values.get('decadenciaMotriz').lower() == 'true' 
-        nuevo_diagnostico["epilepsia"] = request.values.get('epilepsia').lower() == 'true' 
-        nuevo_diagnostico["problemasVisuales"] = request.values.get('problemasVisuales').lower() == 'true' 
+        nuevo_diagnostico["debilidad_focal"] = request.values.get('debilidad_focal').lower() == 'true' 
+        nuevo_diagnostico["convulsiones"] = request.values.get('convulsiones').lower() == 'true' 
+        nuevo_diagnostico["perdida_visual"] = request.values.get('perdida_visual').lower() == 'true' 
 
         img = request.files['imagen']
        
@@ -139,14 +139,14 @@ class PruebaImagen(Resource):
             return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
 
         datos = {
-            'problemasVisuales':nuevo_diagnostico['problemasVisuales'],
-            'decadenciaMotriz':nuevo_diagnostico['decadenciaMotriz'],
-            'epilepsia': nuevo_diagnostico['epilepsia']
+            'perdida_visual':nuevo_diagnostico['perdida_visual'],
+            'debilidad_focal':nuevo_diagnostico['debilidad_focal'],
+            'convulsiones': nuevo_diagnostico['convulsiones']
         }
 
         try:
             # URL de la API externa a la que deseas enviar la imagen
-            url = 'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/brain'
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}'
             
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:

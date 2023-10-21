@@ -22,9 +22,9 @@ class CrudDiagnostico:
             img_encoded = base64.b64encode(img_data).decode('utf-8')
 
             datos_complementarios = {
-                'problemasVisuales': datos_diagnostico['problemasVisuales'],
-                'decadenciaMotriz': datos_diagnostico['decadenciaMotriz'],
-                'epilepsia': datos_diagnostico['epilepsia']
+                'perdida_visual': datos_diagnostico['perdida_visual'],
+                'debilidad_focal': datos_diagnostico['debilidad_focal'],
+                'convulsiones': datos_diagnostico['convulsiones']
             }
 
             # Convertir el diccionario a formato JSON
@@ -42,7 +42,6 @@ class CrudDiagnostico:
                 "id_medico": datos_diagnostico['id_medico'],
                 "id_modelo": 1  
             }
-
             insert_diagnostico(nuevo_diagnostico)
         except Exception as ex:
                 return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
