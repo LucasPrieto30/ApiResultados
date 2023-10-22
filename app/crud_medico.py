@@ -15,20 +15,19 @@ class CrudMedico:
         #if insert_medico(nuevo_medico):
         return insert_medico(nuevo_medico)
         #else:
-         #   return False
+        #   return False
     def consultar_medico_por_id(self, id_medico):
         medico  = consultar_medico_id(id_medico)
         return medico
-'''     if medico:
-            datos_medico = {
-                "id": medico.get("id"),
-                "nombre": medico.get("nombre"),
-                "dni": medico.get("dni"),  # Agrega la lógica para obtener el DNI si está disponible.
-                "email": medico.get("email"),
-                "password": medico.get("password"),
-                "rol_id": medico.get("rol_id"),  # Agrega la lógica para obtener el rol_id si está disponible.
-                "establecimiento_id": medico.get("establecimiento_id"),  # Agrega la lógica para obtener el establecimiento_id si está disponible.
-                "fecha_ultima_password": medico.get("fecha_ultima_password"),  # Agrega la lógica para obtener la fecha_ultima_password si está disponible.
-                "especialidad": medico.get("especialidad")
-            }
-'''
+
+    def comparar_RolUsuario(numero):
+        if numero == 1:
+            return "La entrada es igual a 1"
+        elif numero == 2:
+            return "La entrada es igual a 2"
+        elif numero == 3:
+            return "La entrada es igual a 3"
+        elif numero == 4:
+            return "La entrada es igual a 4"
+        else:
+            return "La entrada no está en el rango del 1 al 4"

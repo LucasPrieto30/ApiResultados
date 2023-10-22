@@ -58,8 +58,8 @@ class CrudDiagnostico:
                 return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
         
        
-    def obtener_diagnostico(self, id_diagnostico):
-        return obtener_diagnostico(id_diagnostico)
+    def obtener_diagnostico(self, id_diagnostico,rol):
+        return obtener_diagnostico(id_diagnostico,rol)
         
     ## si se pide a futuro
     def actualizar_diagnostico(self, id_diagnostico, nuevos_datos):

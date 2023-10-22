@@ -26,7 +26,7 @@ def insert_diagnostico(datos_diagnostico):
         connection.rollback()
         return {'error': str(e)}
 
-def obtener_diagnostico(id_diagnostico):
+def obtener_diagnostico(id_diagnostico, rol):
     diagnostico = None
 
     try:
@@ -45,7 +45,7 @@ def obtener_diagnostico(id_diagnostico):
                     "imagen": imagen_base64,
                     "datos_complementarios": row[2],
                     "fecha": row[3].strftime("%Y-%m-%d %H:%M:%S"),
-                    "resultado": row[4],
+                    #"resultado": row[4],
                     "usuario_id": row[5],
                     "usuario_medico_id": row[6],
                     "modelo_id": row[7],
@@ -53,6 +53,10 @@ def obtener_diagnostico(id_diagnostico):
                     "modelo_nombre": row[9],
                     "nombre_medico": row[10],
                 }
+                if int(rol) == 4:
+                    diagnostico["resultado"] = row[4]  # Agregar "resultado" solo si el rol es 4
+
+            connection.close()
             connection.close()
         if diagnostico:
             return diagnostico

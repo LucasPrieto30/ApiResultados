@@ -1,5 +1,5 @@
 import base64
-from flask_restx import Resource, Namespace, fields, api
+from flask_restx import Resource, Namespace, fields, api, reqparse
 import psycopg2
 from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones
 from .crud_diagnosticos import CrudDiagnostico
@@ -16,6 +16,8 @@ import random
 ns = Namespace("Pruebas")
 ns2 = Namespace("Diagnosticos")
 crud = CrudDiagnostico()
+parser = reqparse.RequestParser()
+parser.add_argument('rol_id', required=True, help='Clave de acceso', location='args')  # 'args' indica que es un parámetro de consulta
 
 # archivos permitidos
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
@@ -176,13 +178,17 @@ class PruebaImagen(Resource):
 
 @ns2.route("/<int:id_diagnostico>")
 class DiagnosticoResource(Resource):
+    @ns2.expect(parser)
     @ns2.doc(responses={200: 'Éxito', 204: 'No existe diagnostico con el id seleccionado'})
     def get(self, id_diagnostico):
-        diagnostico = crud.obtener_diagnostico(id_diagnostico)
+        args = parser.parse_args()
+        rol = args['rol_id']
+        print(rol)
+        diagnostico = crud.obtener_diagnostico(id_diagnostico, rol)
         if diagnostico:
             return diagnostico, 200
         else:
-             return {"message": "No existe diagnóstico con id" + str(id_diagnostico)}, 204
+            return {"message": "No existe diagnóstico con id" + str(id_diagnostico)}, 204
 
 @ns2.route("/Delete/<int:id_diagnostico>")
 class DiagnosticoDeleteResource(Resource):
