@@ -25,56 +25,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@ns.route("/imagen")
-class Pruebas(Resource):
-    @ns.expect(post_model)
-    def post(self):
-        return {"saludo": "hola post"}, 200
-    
-@ns.route("")
-class Pruebas(Resource):
-    def get(self):
-        return {"saludo": "hola get"}, 200
-    
-@ns.route("/prediccion")
-class PruebasPredicciones(Resource):
-    def get(self):
-        numeroPrediccion = round(random.uniform(0.00, 1.00), 2)
-        if numeroPrediccion < 0.60:
-            resultado = "No certero"
-        elif 0.60 <= numeroPrediccion < 0.65:
-            resultado = "Poco certero"
-        else:
-            resultado = "Muy certero"
-        numeroPrediccionFormateado = '{:.2f}'.format(numeroPrediccion)
-        print("el resultado ",numeroPrediccionFormateado,resultado)
-        respuesta = {
-            "precision": numeroPrediccionFormateado,
-            "prediccion": resultado
-        }
-        return respuesta, 200
-    
-@ns.route('/historial/<int:id>')
-class PruebaHistorial(Resource):
-    def get(self,id):
-        try:
-           connection=get_connection()
-           with connection.cursor() as cursor:
-                cursor.execute(f'SELECT id, fecha, hora, estudio, descripcion FROM public."Historial" WHERE id=%s;',(id,))
-                row = cursor.fetchone()
-        
-                if row != None:
-                    historial= Historial(row[0], row[1], row[2], row[3], row[4])
-                    connection.close()
-                    
-                    if historial != None:
-                        return jsonify(historial.to_JSON())
-                    return jsonify({"message": 'Historial no encontrado'})
-                else: 
-                    return jsonify({"message": 'Historial no encontrado'})       
-        except Exception as ex:
-            return jsonify({"message": str(ex)}),500
-        
 @ns2.route('/historial')
 class HistorialResource(Resource):
     @ns.expect(historial_parser)
@@ -172,18 +122,6 @@ class PruebaImagen(Resource):
                 return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
         except Exception as ex:
             return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
-
-
-
-@ns.route("/all")
-class DiagnosticoListResource(Resource):
-    @ns2.doc(responses={200: 'Éxito', 204: 'No hay diagnósticos para mostrar'})
-    def get(self):
-        diagnostico = crud.mostrar_diagnosticos()
-        if diagnostico:
-            return diagnostico, 200
-        elif len(diagnostico) == 0:
-            return {"message": "No hay diagnósticos disponibles para mostrar"}, 204
 
 @ns2.route("/<int:id_diagnostico>")
 class DiagnosticoResource(Resource):
