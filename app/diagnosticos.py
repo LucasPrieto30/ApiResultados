@@ -120,7 +120,7 @@ class PruebaImagen(Resource):
                 crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
                 return data, 200
             else:
-                return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
+                return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
         except Exception as ex:
             return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
         
@@ -170,7 +170,7 @@ class PruebaImagen(Resource):
                 crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
                 return data, 200
             else:
-                return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
+                return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
         except Exception as ex:
             return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
 
