@@ -19,15 +19,3 @@ class CrudMedico:
     def consultar_medico_por_id(self, id_medico):
         medico  = consultar_medico_id(id_medico)
         return medico
-
-    def comparar_RolUsuario(numero):
-        if numero == 1:
-            return "La entrada es igual a 1"
-        elif numero == 2:
-            return "La entrada es igual a 2"
-        elif numero == 3:
-            return "La entrada es igual a 3"
-        elif numero == 4:
-            return "La entrada es igual a 4"
-        else:
-            return "La entrada no está en el rango del 1 al 4"

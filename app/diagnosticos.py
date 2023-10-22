@@ -6,6 +6,7 @@ from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from app.models.entities.Historial import Historial
 from database.db import get_connection
+from database.dto_medico import verificar_Usuario_rol_medico
 from werkzeug.utils import secure_filename
 import os
 from psycopg2 import Binary
@@ -37,39 +38,47 @@ class HistorialResource(Resource):
         rol_id = args['rol_id']
 
         try:
-            connection=get_connection()
+            connection = get_connection()
             with connection.cursor() as cursor:
                 query_sql = 'SELECT d.id, d.imagen, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_id, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_id = me.id'
-                if rol_id == 4:
-                    # Consulta para médicos
+
+                if verificar_Usuario_rol_medico(rol_id):
                     cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
                 elif rol_id == 1:
-                    # Consulta para auditores
-                    cursor.execute(query_sql)
+                    # Consulta para auditores sin la columna "resultado"
+                    #cursor.execute(query_sql)
+                    cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
+
                 else:
                     return {"error": "Rol no válido"}, 400
 
                 historial = cursor.fetchall()
                 cursor.close()
             
-            # historial según la estructura del response
+            # Historial formateado según la estructura del response
             historial_formateado = []
             for diagnostico in historial:
-                historial_formateado.append({
-                    "id": diagnostico[0],  
+                diagnostico_dict = {
+                    "id": diagnostico[0],
                     "imagen": base64.b64encode(base64.b64decode(diagnostico[1])).decode('utf-8'),
                     "datos_complementarios": diagnostico[2],
                     "fecha": diagnostico[3].strftime("%Y-%m-%d %H:%M:%S"),
-                    "resultado": diagnostico[4],
                     "usuario_id": diagnostico[5],
                     "usuario_medico_id": diagnostico[6],
                     "modelo_id": diagnostico[7],
                     "nombre_usuario": diagnostico[8],
                     "modelo_nombre": diagnostico[9],
                     "nombre_medico": diagnostico[10]
-                })
+                }
+
+                # Verificar el rol y agregar o excluir la columna "resultado"
+                if rol_id == 4:
+                    diagnostico_dict["resultado"] = diagnostico[4]
+
+                historial_formateado.append(diagnostico_dict)
+
             return {"historial": historial_formateado}
-        
+
         except psycopg2.Error as e:
             return {"error": "Error al acceder a la base de datos"}, 500
         finally:

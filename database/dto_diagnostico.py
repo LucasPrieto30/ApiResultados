@@ -54,7 +54,7 @@ def obtener_diagnostico(id_diagnostico, rol):
                     "nombre_medico": row[10],
                 }
                 if int(rol) == 4:
-                    diagnostico["resultado"] = row[4]  # Agregar "resultado" solo si el rol es 4
+                    diagnostico["resultado"] = row[4]
 
             connection.close()
             connection.close()

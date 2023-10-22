@@ -174,3 +174,15 @@ def consultar_medico_id(medico_id):
         connection.close()
 
 '''
+def verificar_Usuario_rol_medico(valor):
+    if valor == 4:
+        conn = get_connection()       
+        cur = conn.cursor()
+        cur.execute("SELECT id, tipo, descripcion FROM public.rol WHERE id = 4")    
+        resultado = cur.fetchone()
+        conn.close()      
+        # Verificar si se encontró un registro con id igual a 4 y tipo igual a "Medico"
+        if resultado and resultado[0] == 4 and resultado[1] == "Medico":
+            return True
+
+    return False
