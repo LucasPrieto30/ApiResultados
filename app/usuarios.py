@@ -9,7 +9,22 @@ from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico
 
+from flask_restx import Api
+
+
+api = Api()
+
 ns_usuarios = Namespace("Usuarios")
+
+user_parser = api.parser()
+user_parser.add_argument('nombre', type=str, required=True, help='Nombre')
+user_parser.add_argument('dni', type=str, required=True, help='DNI')
+user_parser.add_argument('new_dni', type=str, required=True, help='Nuevo DNI')
+user_parser.add_argument('password', type=str, required=True, help='Contraseña')
+user_parser.add_argument('rol_id', type=int, required=True, help='Rol ID')
+user_parser.add_argument('establecimiento_id', type=int, required=True, help='Id del establecimiento')
+
+
 crud2 = CrudMedico()
 @ns_usuarios.route('/medicos')
 class Medicos(Resource):
@@ -101,3 +116,120 @@ class Medico(Resource):
             }
 
             return response, 404  # Devuelve un error 404 si el médico no se encuentra
+
+@ns_usuarios.route('/admin/alta')
+class Usuarios(Resource):
+    @ns_usuarios.expect(user_parser)
+    def post(self):
+        try:
+            
+            args = user_parser.parse_args()
+
+            nombre = args['nombre']
+            dni = args['dni']
+            password = args['password']
+            rol_id = args['rol_id']
+            establecimiento_id = args['establecimiento_id']
+
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                
+                consulta = "INSERT INTO public.usuario (nombre, dni, password, rol_id, establecimiento_id) VALUES (%s, %s, %s, %s, %s) RETURNING id;"
+                cursor.execute(consulta, (nombre, dni, password, rol_id, establecimiento_id))
+                new_user_id = cursor.fetchone()[0]
+                connection.commit()
+
+            cursor.close()
+            connection.close()
+
+            return {"message": "Agregado exitosamente", "user_id": new_user_id}, 201
+
+        except Exception as ex:
+            return {"message": str(ex)}, 500
+
+
+
+
+
+@ns_usuarios.route('/usuarios/<string:dni>')
+class Usuario(Resource):
+    def delete(self, dni):
+        try:
+
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id FROM public.usuario WHERE dni = %s", (dni,))
+                existing_user = cursor.fetchone()
+                if not existing_user:
+                    return {"message": "No encontrado"}, 404  
+
+                # Borro ususario por dni
+                cursor.execute("DELETE FROM public.usuario WHERE  dni = %s", (dni,))
+                connection.commit()
+
+            cursor.close()
+            connection.close()
+
+            return {"message": "Borrado exitosamente"}, 200
+
+        except Exception as ex:
+            return {"message": str(ex)}, 500
+        
+
+                
+        
+@ns_usuarios.route('/update-user-informacion', methods=['PATCH'])
+class UpdateUserInfo(Resource):
+    @ns_usuarios.expect(user_parser)
+    def patch(self):
+        try:
+            args = user_parser.parse_args()
+
+            dni = args['dni']
+
+            new_nombre = args['nombre']
+            new_dni = args['new_dni']
+            new_password = args['password']
+            new_rol_id = args['rol_id']
+            new_establecimiento = args['establecimiento_id']
+
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id FROM public.usuario WHERE dni = %s", (dni,))
+                existing_user = cursor.fetchone()
+                if not existing_user:
+                    return {"message": "No encontrado"}, 404  
+
+             
+                update_sql = "UPDATE public.usuario SET"
+                params = []
+                if new_nombre:
+                    update_sql += " nombre = %s,"
+                    params.append(new_nombre)
+                if new_dni:
+                    update_sql += " dni = %s,"
+                    params.append(new_dni)
+                if new_password:
+                    update_sql += " password = %s,"
+                    params.append(new_password)
+                if new_rol_id:
+                    update_sql += " rol_id = %s,"
+                    params.append(new_rol_id)
+                if new_establecimiento:
+                    update_sql += " establecimiento_id = %s,"
+                    params.append(new_establecimiento)
+
+                update_sql = update_sql.rstrip(',') + " WHERE dni = %s;"
+                params.append(dni)
+
+                cursor.execute(update_sql, params)
+                connection.commit()
+
+            cursor.close()
+            connection.close()
+
+            return {"message": "Informacion de usuario actualizada"}, 200
+
+        except Exception as ex:
+            return {"message": str(ex)}, 500
+        
