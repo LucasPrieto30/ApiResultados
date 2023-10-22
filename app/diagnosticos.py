@@ -87,13 +87,13 @@ class HistorialResource(Resource):
         try:
             connection=get_connection()
             with connection.cursor() as cursor:
-
+                query_sql = 'SELECT d.id, d.imagen, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_id, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_id = me.id'
                 if rol_id == 4:
                     # Consulta para médicos
-                    cursor.execute("SELECT * FROM public.diagnostico WHERE usuario_medico_id = %s", (id_usuario,))
+                    cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
                 elif rol_id == 1:
                     # Consulta para auditores
-                    cursor.execute("SELECT * FROM  public.diagnostico")
+                    cursor.execute(query_sql)
                 else:
                     return {"error": "Rol no válido"}, 400
 
@@ -111,7 +111,10 @@ class HistorialResource(Resource):
                     "resultado": diagnostico[4],
                     "usuario_id": diagnostico[5],
                     "usuario_medico_id": diagnostico[6],
-                    "modelo_id": diagnostico[7]
+                    "modelo_id": diagnostico[7],
+                    "nombre_usuario": diagnostico[8],
+                    "modelo_nombre": diagnostico[9],
+                    "nombre_medico": diagnostico[10]
                 })
             return {"historial": historial_formateado}
         
