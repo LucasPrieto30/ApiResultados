@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields, api
 import psycopg2
-from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from app.models.entities.Historial import Historial
@@ -57,7 +57,7 @@ class HistorialResource(Resource):
                     "id": diagnostico[0],  
                     "imagen": base64.b64encode(base64.b64decode(diagnostico[1])).decode('utf-8'),
                     "datos_complementarios": diagnostico[2],
-                    "fecha": diagnostico[3].strftime("%d-%m-%Y"),
+                    "fecha": diagnostico[3].strftime("%Y-%m-%d %H:%M:%S"),
                     "resultado": diagnostico[4],
                     "usuario_id": diagnostico[5],
                     "usuario_medico_id": diagnostico[6],
@@ -75,12 +75,13 @@ class HistorialResource(Resource):
 
 @ns2.route('/predecir/cerebro')
 class PruebaImagen(Resource):
-    @ns.expect(diag_parser)
+    @ns.expect(diag_parser_cerebro)
     def post(self):
-        nuevo_diagnostico = diag_parser.parse_args()
+        nuevo_diagnostico = diag_parser_cerebro.parse_args()
         nuevo_diagnostico["debilidad_focal"] = request.values.get('debilidad_focal').lower() == 'true' 
         nuevo_diagnostico["convulsiones"] = request.values.get('convulsiones').lower() == 'true' 
         nuevo_diagnostico["perdida_visual"] = request.values.get('perdida_visual').lower() == 'true' 
+        nuevo_diagnostico["modelo_id"] = 1
 
         img = request.files['imagen']
        
@@ -100,6 +101,56 @@ class PruebaImagen(Resource):
         try:
             # URL de la API externa a la que deseas enviar la imagen
             url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}'
+            
+            # Leer la imagen en formato binario
+            with open(os.path.join('app/static', filename), 'rb') as file:
+                image_data = file.read()
+            
+            # falta agregar datos complementarios a la request
+            files = {'image': (filename, image_data, 'image/jpeg')}
+
+            # Realizar la solicitud POST con los datos y la imagen
+            response = requests.post(url, files=files) # data= datos
+
+            # Procesar la respuesta
+            if response.status_code == 200:
+                # Si la respuesta es JSON, puedes cargarla como un diccionario
+                data = response.json()
+                # guarda el diagnostico cuando se obtiene el response
+                crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                return data, 200
+            else:
+                return {'error': 'Error en la solicitud POST', 'status_code': response.status_code}, 500
+        except Exception as ex:
+            return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
+        
+@ns2.route('/predecir/pulmones')
+class PruebaImagen(Resource):
+    @ns.expect(diag_parser_pulmones)
+    def post(self):
+        nuevo_diagnostico = diag_parser_pulmones.parse_args()
+        nuevo_diagnostico["puntada_lateral"] = request.values.get('puntada_lateral').lower() == 'true' 
+        nuevo_diagnostico["fiebre"] = request.values.get('fiebre').lower() == 'true' 
+        nuevo_diagnostico["dificultad_respiratoria"] = request.values.get('dificultad_respiratoria').lower() == 'true' 
+        nuevo_diagnostico["modelo_id"] = 2
+        img = request.files['imagen']
+       
+        filename = ""
+        if img and allowed_file(img.filename):
+            filename = secure_filename(img.filename)
+            img.save(os.path.join('app/static', filename))
+        else:
+            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+
+        datos = {
+            'puntada_lateral':nuevo_diagnostico['puntada_lateral'],
+            'fiebre':nuevo_diagnostico['fiebre'],
+            'dificultad_respiratoria': nuevo_diagnostico['dificultad_respiratoria']
+        }
+
+        try:
+            # URL de la API externa a la que deseas enviar la imagen
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/wini?puntada_lateral={datos["puntada_lateral"]}&fiebre={datos["fiebre"]}&dificultad_respiratoria={datos["dificultad_respiratoria"]}'
             
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:

@@ -25,14 +25,22 @@ historial_parser.add_argument('id_usuario', type=int, required=True, help='ID de
 historial_parser.add_argument('rol_id', type=int, required=True, help='Rol ID')
 
 # parametros para diagnostico del modelo: cerebro
-diag_parser = reqparse.RequestParser()
-diag_parser.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
-diag_parser.add_argument('perdida_visual', type=bool, required=True, help='Pérdida visual')
-diag_parser.add_argument('debilidad_focal', type=bool, required=True, help='debilidad_focal')
-diag_parser.add_argument('convulsiones', type=bool, required=True, help='Convulsiones')
-diag_parser.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
-diag_parser.add_argument('id_medico', type=int, required=True, help='ID de médico')
+diag_parser_cerebro = reqparse.RequestParser()
+diag_parser_cerebro.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
+diag_parser_cerebro.add_argument('perdida_visual', type=bool, required=True, help='Pérdida visual')
+diag_parser_cerebro.add_argument('debilidad_focal', type=bool, required=True, help='debilidad_focal')
+diag_parser_cerebro.add_argument('convulsiones', type=bool, required=True, help='Convulsiones')
+diag_parser_cerebro.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
+diag_parser_cerebro.add_argument('id_medico', type=int, required=True, help='ID de médico')
 
+# parametros para diagnostico del modelo: pulmones
+diag_parser_pulmones = reqparse.RequestParser()
+diag_parser_pulmones.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
+diag_parser_pulmones.add_argument('puntada_lateral', type=bool, required=True, help='puntada_lateral')
+diag_parser_pulmones.add_argument('fiebre', type=bool, required=True, help='fiebre')
+diag_parser_pulmones.add_argument('dificultad_respiratoria', type=bool, required=True, help='dificultad_respiratoria')
+diag_parser_pulmones.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
+diag_parser_pulmones.add_argument('id_medico', type=int, required=True, help='ID de médico')
 
 from datetime import datetime
 

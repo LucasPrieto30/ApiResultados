@@ -1,7 +1,7 @@
 import base64
 import datetime
 import json
-
+import pytz
 import psycopg2
 from database.dto_diagnostico import insert_diagnostico, obtener_diagnostico, obtener_todos_diagnosticos, eliminar_diagnostico
 from psycopg2 import Binary
@@ -18,20 +18,31 @@ class CrudDiagnostico:
     # diagnostico modelo de cerebro
     def crear_diagnostico(self, datos_diagnostico, data, img_data):
         try:
-            
             img_encoded = base64.b64encode(img_data).decode('utf-8')
+            datos_complementarios = {}
 
-            datos_complementarios = {
-                'perdida_visual': datos_diagnostico['perdida_visual'],
-                'debilidad_focal': datos_diagnostico['debilidad_focal'],
-                'convulsiones': datos_diagnostico['convulsiones']
-            }
+            if(datos_diagnostico['modelo_id'] == 1):
+                datos_complementarios = {
+                    'perdida_visual': datos_diagnostico['perdida_visual'],
+                    'debilidad_focal': datos_diagnostico['debilidad_focal'],
+                    'convulsiones': datos_diagnostico['convulsiones']
+                }
+            elif(datos_diagnostico['modelo_id'] == 2):
+                datos_complementarios = {
+                    'puntada_lateral': datos_diagnostico['puntada_lateral'],
+                    'fiebre': datos_diagnostico['fiebre'],
+                    'dificultad_respiratoria': datos_diagnostico['dificultad_respiratoria']
+                }
 
             # Convertir el diccionario a formato JSON
             datos_complementarios_json = json.dumps(datos_complementarios)
+            # Define la zona horaria de Argentina
+            zona_horaria_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
 
+            # Obtiene la fecha y hora actual en la zona horaria de Argentina
+            fecha_hora_argentina = datetime.datetime.now(zona_horaria_argentina)
             # Obtener la fecha actual
-            fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            fecha_actual = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
             # crear un diagnóstico con los datos
             nuevo_diagnostico = {
                 "imagen": img_encoded,
@@ -40,7 +51,7 @@ class CrudDiagnostico:
                 "resultado": json.dumps(data), 
                 "usuario_id":  datos_diagnostico['id_usuario'], 
                 "id_medico": datos_diagnostico['id_medico'],
-                "id_modelo": 1  
+                "id_modelo": datos_diagnostico['modelo_id']  
             }
             insert_diagnostico(nuevo_diagnostico)
         except Exception as ex:

@@ -44,7 +44,7 @@ def obtener_diagnostico(id_diagnostico):
                     "id": row[0],  
                     "imagen": imagen_base64,
                     "datos_complementarios": row[2],
-                    "fecha": row[3].strftime("%d-%m-%Y"),
+                    "fecha": row[3].strftime("%Y-%m-%d %H:%M:%S"),
                     "resultado": row[4],
                     "usuario_id": row[5],
                     "usuario_medico_id": row[6],
