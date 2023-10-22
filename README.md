@@ -15,7 +15,7 @@ En esta sección se encuentran los endpoints que manejan los diagnosticos, resul
 #### /Diagnosticos/predecir/cerebro [POST]
 
 El objetivo de este endpoint es comunicarse con el modelo del cerebro para obtener las probabilidades de tener las distintas clases de tumores.
-Recibe la imagen, tres valores booleanos si tiene epilepsia, si tiene problemas visuales y si tiene decadencia motriz, el id del usuario que realizo la consulta y el id del medico al que se cargara
+Recibe la imagen, tres valores booleanos si tiene convulsiones, si tiene pérdida visual y si tiene debilidad focal, el id del usuario que realizo la consulta y el id del medico al que se cargara
 el diagnostico en su nombre.
 Retorna un JSON con las probabilidades de cada clase. Las clases son las siguientes:
 - Glioma
@@ -25,7 +25,7 @@ Retorna un JSON con las probabilidades de cada clase. Las clases son las siguien
 Ademas guarda los datos de la consulta con su resultado en la base de datos.
 
 Ejemplo de uso:
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/31454195-48b4-463f-9106-85db699b34ab)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/020488c5-9ba6-47a8-8a66-8181691f4324)
 
 #### /Diagnosticos/predecir/pulmones [POST]
 
