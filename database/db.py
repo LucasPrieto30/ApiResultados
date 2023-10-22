@@ -8,8 +8,8 @@ def get_connection():
 
     try:
         return psycopg2.connect(host='0.tcp.sa.ngrok.io',
-                                user=password_bbdd,
-                                password=usuario_bbdd,
+                                user=usuario_bbdd,
+                                password=password_bbdd,
                                 database='pruebas',
                                 port='14208')
     except DatabaseError as ex:
