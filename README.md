@@ -27,13 +27,28 @@ Ademas guarda los datos de la consulta con su resultado en la base de datos.
 Ejemplo de uso:
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/31454195-48b4-463f-9106-85db699b34ab)
 
+#### /Diagnosticos/predecir/pulmones [POST]
+
+El objetivo de este endpoint es comunicarse con el modelo de pulmones para obtener las probabilidades de tener o no pulmonía.
+Recibe la imagen, tres valores booleanos si tiene puntadas laterales, si tiene fiebre y si tiene dificultad respiratoria, el id del usuario que realizo la consulta y el id del medico al que se cargará
+el diagnóstico en su nombre.
+Retorna un JSON con las probabilidades de cada clase. Las clases son las siguientes:
+- no_pneumonia
+- pneumonia
+
+Ademas guarda los datos de la consulta con su resultado en la base de datos.
+
+Ejemplo de uso:
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/f7bc1b27-1c54-4d7b-88db-d0d592f8374d)
+
+
 #### /Diagnosticos/historial [GET]
 
 Obtiene el historial de diagnosticos. Si el que realiza la consulta es un auditor devuelve todos los diagnosticos guardados. Si es un medico devuelve los diagnosticos cargados a su nombre.
 Recibe id de usuario y id de rol.
 
 Ejemplo de uso:
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/d2219d96-7e18-41b7-a89d-2707ea1caf93)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/3e7252eb-fce7-42de-90c4-24eee6a2ca12)
 
 #### /Diagnosticos/{id_diagnostico} [GET]
 
