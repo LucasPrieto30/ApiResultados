@@ -105,7 +105,7 @@ class HistorialResource(Resource):
             for diagnostico in historial:
                 historial_formateado.append({
                     "id": diagnostico[0],  
-                    "imagen": base64.b64encode(diagnostico[1]).decode('utf-8'),
+                    "imagen": base64.b64encode(base64.b64decode(diagnostico[1])).decode('utf-8'),
                     "datos_complementarios": diagnostico[2],
                     "fecha": diagnostico[3].strftime("%d-%m-%Y"),
                     "resultado": diagnostico[4],
