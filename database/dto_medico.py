@@ -85,9 +85,9 @@ def consultar_medico_id(medico_id):
                 "fecha_ultima_password": fecha_ultima_password_str,
                 "especialidad": especialidad
             }
-            return {"success": True, "medico": medico}
+            return medico
         else:
-            return {"success": True, "message": "No se encontró ningún médico con ese ID"}
+            return {"message": "No se encontró ningún usuario con ese ID"}
     except Exception as e:
         connection.rollback()
         return {"success": False, "message": "Error inesperado: " + str(e)}

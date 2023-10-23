@@ -5,13 +5,14 @@ from app.models.entities.Historial import Historial
 from database.db import get_connection
 from werkzeug.utils import secure_filename
 import os
+import pytz
 from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico
 from flask_restx import Api
 from database.dto_medico import obtener_clave_desde_Medico
 import argparse
-from datetime import datetime
+import datetime
 api = Api()
 
 ns_usuarios = Namespace("Usuarios")
@@ -29,6 +30,15 @@ user_parser.add_argument('password', type=str, required=True, help='Contraseña'
 user_parser.add_argument('rol_id', type=int, required=True, help='Rol ID')
 user_parser.add_argument('establecimiento_id', type=int, required=True, help='Id del establecimiento')
 user_parser.add_argument('especialidad', type=str, required=True, help='especialidad')
+
+user_parser_update = api.parser()
+user_parser_update.add_argument('dni', type=str, required=True, help='DNI')
+user_parser_update.add_argument('new_dni', type=str, required=False, help='Nuevo DNI')
+user_parser_update.add_argument('nombre', type=str, required=False, help='Nombre')
+user_parser_update.add_argument('password', type=str, required=False, help='Contraseña')
+user_parser_update.add_argument('rol_id', type=int, required=False, help='Rol ID')
+user_parser_update.add_argument('establecimiento_id', type=int, required=False, help='Id del establecimiento')
+user_parser_update.add_argument('especialidad', type=str, required=False, help='especialidad')
 
 
 
@@ -61,19 +71,19 @@ class Medicos(Resource):
         except Exception as ex:
             return jsonify({"message": str(ex.__cause__)}), 500
 
-@ns_usuarios.route("")
-class MedicoCreate(Resource):
-	@ns_usuarios.expect(post_medico)
-	@ns_usuarios.doc(responses={201: 'Éxito', 500: 'Error al enviar el medico'})
-	def post(self):
-		# tener los datos del medico del cuerpo de la solicitud
-			nuevo_medico = ns_usuarios.payload
-			# Llama al método para crear un medico en el CRUD
-			resultado = crud2.crear_medico(nuevo_medico)
-			if resultado.get("success", False):
-				return resultado, 201  # Devuelve el médico creado y el código 201 (Created)
-			else:
-				return {"error": resultado.get("message", "No se pudo crear el médico")}, 500  # En caso de error
+# @ns_usuarios.route("")
+# class MedicoCreate(Resource):
+# 	@ns_usuarios.expect(post_medico)
+# 	@ns_usuarios.doc(responses={201: 'Éxito', 500: 'Error al enviar el medico'})
+# 	def post(self):
+# 		# tener los datos del medico del cuerpo de la solicitud
+# 			nuevo_medico = ns_usuarios.payload
+# 			# Llama al método para crear un medico en el CRUD
+# 			resultado = crud2.crear_medico(nuevo_medico)
+# 			if resultado.get("success", False):
+# 				return resultado, 201  # Devuelve el médico creado y el código 201 (Created)
+# 			else:
+# 				return {"error": resultado.get("message", "No se pudo crear el médico")}, 500  # En caso de error
 
 @ns_usuarios.route("/<int:id>")
 class Medico(Resource):
@@ -82,7 +92,7 @@ class Medico(Resource):
 	def get(self, id):
 		#args = parser.parse_args()  # Analiza los argumentos de la solicitud
 		# Obtén el ID y la clave de los argumentos
-		medico_id = id
+		usuario_id = id
 		#clave = args['clave'].encode('utf-8')
 		#clave_ingresada = clave.encode('utf-8')
 		#CLAVE_REQUERIDA_str = CLAVE_REQUERIDA.decode('utf-8')
@@ -98,14 +108,11 @@ class Medico(Resource):
 		#if clave != CLAVE_REQUERIDA:
 		 #   return {"error": "Acceso no autorizado"}, 401  # Devuelve un error 401 (No autorizado) si la clave no coincide
 		# Realiza una consulta en la base de datos para obtener los datos del médico con el ID proporcionado (id)
-		medico = crud2.consultar_medico_por_id(medico_id)
-		if medico:
+		usuario = crud2.consultar_medico_por_id(usuario_id)
+		if usuario:
 			try:
-				response = {
-				"success": True,
-				"medico": medico
-				}
-				return response ,200
+				response = usuario
+				return response, 200
 			except Exception as e:
 				response = {
 					"success": False,
@@ -145,7 +152,13 @@ class Usuarios(Resource):
 			password = args['password']
 			rol_id = args['rol_id']
 			establecimiento_id = args['establecimiento_id']
-			fecha_ultima_password = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+			zona_horaria_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
+
+			# Obtiene la fecha y hora actual en la zona horaria de Argentina
+			fecha_hora_argentina = datetime.datetime.now(zona_horaria_argentina)
+			# Obtener la fecha actual
+			fecha_ultima_password = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
 			especialidad = args['especialidad']
 
 			connection = get_connection()
@@ -163,9 +176,6 @@ class Usuarios(Resource):
 
 		except Exception as ex:
 			return {"message": str(ex)}, 500
-
-
-
 
 
 @ns_usuarios.route('/usuarios/<string:dni>')
@@ -191,17 +201,14 @@ class Usuario(Resource):
 
 		except Exception as ex:
 			return {"message": str(ex)}, 500
-		
-
 				
 		
 @ns_usuarios.route('/update-user-informacion', methods=['PATCH'])
 class UpdateUserInfo(Resource):
-	@ns_usuarios.expect(user_parser)
+	@ns_usuarios.expect(user_parser_update)
 	def patch(self):
 		try:
-			args = user_parser.parse_args()
-
+			args = user_parser_update.parse_args()
 			dni = args['dni']
 
 			new_nombre = args['nombre']
@@ -225,8 +232,14 @@ class UpdateUserInfo(Resource):
 					update_sql += " dni = %s,"
 					params.append(new_dni)
 				if new_password:
-					update_sql += " password = %s,"
+					zona_horaria_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
+					# Obtiene la fecha y hora actual en la zona horaria de Argentina
+					fecha_hora_argentina = datetime.datetime.now(zona_horaria_argentina)
+					# Obtener la fecha actual
+					fecha_ultima_password = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
+					update_sql += " password = %s, fecha_ultima_password = %s,"
 					params.append(new_password)
+					params.append(fecha_ultima_password)
 				if new_rol_id:
 					update_sql += " rol_id = %s,"
 					params.append(new_rol_id)
