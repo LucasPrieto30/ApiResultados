@@ -160,7 +160,7 @@ def consultar_medico_id(medico_id):
 '''
 def obtener_clave_desde_Medico():
         try:
-            with open('./etc/secrets/claveMedico.key', 'r') as archivo:
+            with open('./etc/secrets/claveMedico.txt', 'r') as archivo:
                 clave = archivo.read().strip()
                 print(clave)
             return clave
