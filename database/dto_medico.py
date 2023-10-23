@@ -104,6 +104,19 @@ def consultar_medico_id(medico_id):
     finally:
         cursor.close()
         connection.close()
+
+def obtener_clave_desde_Medico():
+        try:
+            with open('keys/claveMedico.key', 'r') as archivo:
+                clave = archivo.read().strip()
+                print(clave)
+            return clave
+        except FileNotFoundError:
+            print(f"El archivo no se encontró.")
+        except Exception as ex:
+            print(f"Error al leer la clave desde el archivo: {ex}")
+        return None
+
 '''
 def consultar_medico_id(medico_id):    
         # Realizar la consulta en la base de datos para obtener los datos del médico por su ID
@@ -172,7 +185,6 @@ def consultar_medico_id(medico_id):
     finally:
         cursor.close()
         connection.close()
-
 '''
 def verificar_Usuario_rol_medico(valor):
     if valor == 4:
