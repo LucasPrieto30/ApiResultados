@@ -80,22 +80,45 @@ Obtiene el usuario por su id
 Ejemplo de uso
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/0349c2dc-4b54-4172-8fc2-8423c7ce934a)
 
-#### /Usuarios [POST]
+#### /Usuarios/admin/alta [POST]
 
-Crea un usuario. Los datos que espera por body son:
-{
+Crea un usuario. Los datos que espera son:
   - "nombre": "string",
   - "dni": "string",
   - "email": "string",
   - "password": "string",
   - "rol_id": 0,
   - "establecimiento_id": 0,
-  - "fecha_ultima_password": "2023-10-20T18:46:01.327Z",
   - "especialidad": "string"
-}
 
 Ejemplo de uso
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/b102f487-f263-4df9-aae3-fcd9d11664ce)
 
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/0b3408c0-ab18-4a42-b403-801280f43084)
+#### /Usuarios/update-user-informacion [PATCH]
+
+Recibe un dni (requerido) y actualiza el usuario con ese dni para actuzalizar sus datos.
+Recibe:
+- dni (obligatorio)
+- new_dni
+- nombre
+- password
+- rol_id
+- establecimiento_id
+- escpecialidad
+Solo mandar los datos que se deseen actualizar.
+Por ejemplo si al usuario con dni "3534654" se le quiere actualizar el rol y la especialidad:
+
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/1c476dbf-7621-4a2b-8b4e-bf8ace4c8adf)
+
+#### /Usuarios/{dni}
+
+Elimina un usuario mediante su dni
+Ejemplo de uso:
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/299e09c6-4172-45d1-813e-aaca9b3e2986)
+
+
+
+
+
 
 
