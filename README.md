@@ -78,8 +78,7 @@ Ejemplo de uso
 Obtiene el usuario por su id
 
 Ejemplo de uso
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/3906373d-4ae3-4a52-9fcc-cc9c020fb24f)
-
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/0349c2dc-4b54-4172-8fc2-8423c7ce934a)
 
 #### /Usuarios [POST]
 
