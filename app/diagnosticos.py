@@ -47,7 +47,7 @@ class HistorialResource(Resource):
                 elif rol_id == 1:
                     # Consulta para auditores sin la columna "resultado"
                     #cursor.execute(query_sql)
-                    cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
+                    cursor.execute(query_sql)
 
                 else:
                     return {"error": "Rol no válido"}, 400
