@@ -2,7 +2,7 @@ from database.db import get_connection
 from cryptography.fernet import Fernet
 import psycopg2
 from datetime import datetime
-
+import os
 def cargar_clave_medico():
     with open("clave_medico.key", "rb") as archivo:
         return archivo.read()
@@ -13,7 +13,7 @@ def insert_medico(nuevo_medico):
     clave_maestra = cargar_clave_medico()
     fernet = Fernet(clave_maestra)
     try:
-        insert_query = """
+        select_query = """
         INSERT INTO usuario (nombre, dni, email, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
@@ -159,6 +159,9 @@ def consultar_medico_id(medico_id):
         connection.close()
 '''
 def obtener_clave_desde_Medico():
+        clave = os.environ.get('claveMedico')
+        return clave
+        '''
         try:
             with open('./etc/secrets/claveMedico.txt', 'r') as archivo:
                 clave = archivo.read().strip()
@@ -169,7 +172,7 @@ def obtener_clave_desde_Medico():
         except Exception as ex:
             print(f"Error al leer la clave desde el archivo: {ex}")
         return None
-
+'''
 '''
 def consultar_medico_id(medico_id):    
         # Realizar la consulta en la base de datos para obtener los datos del médico por su ID
