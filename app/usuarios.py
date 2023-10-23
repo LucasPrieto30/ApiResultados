@@ -178,7 +178,7 @@ class Usuarios(Resource):
 			return {"message": str(ex)}, 500
 
 
-@ns_usuarios.route('/usuarios/<string:dni>')
+@ns_usuarios.route('/<string:dni>')
 class Usuario(Resource):
 	def delete(self, dni):
 		try:
