@@ -43,7 +43,60 @@ def insert_medico(nuevo_medico):
         cursor.close()
         connection.close()
 
+def consultar_medico_id(medico_id):
+    connection = get_connection()
+    cursor = connection.cursor()
+    clave_maestra= obtener_clave_desde_Medico()
+    try:
+        select_query = """
+        SELECT id, nombre, dni, pgp_sym_decrypt(email::bytea, %s, 'compress-algo=0,cipher-algo=AES128') AS email_descifrado,
+        password, rol_id, establecimiento_id, fecha_ultima_password, especialidad
+        FROM usuario
+        WHERE id = %s
+        """
+        cursor.execute(select_query, (clave_maestra, medico_id))
+        medico_data = cursor.fetchone()
+        if medico_data:
+            id = medico_data[0]
+            nombre = medico_data[1]
+            dni = medico_data[2]
+            email_descifrado = medico_data[3]
+            password = medico_data[4]
+            rol_id = medico_data[5]
+            establecimiento_id = medico_data[6]
+            fecha_ultima_password = medico_data[7]
+            especialidad = medico_data[8]
 
+            if fecha_ultima_password is not None:
+                # Convierte la fecha a una cadena en un formato deseado (por ejemplo, "Año-Mes-Día Hora:Minuto:Segundo")
+                fecha_ultima_password_str = fecha_ultima_password.strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                # Establece una cadena predeterminada o un valor apropiado cuando fecha_ultima_password es None
+                fecha_ultima_password_str = "Fecha no disponible"
+
+            medico = {
+                "id": id,
+                "nombre": nombre,
+                "dni": dni,
+                "email": email_descifrado,
+                "password": password,
+                "rol_id": rol_id,
+                "establecimiento_id": establecimiento_id,
+                "fecha_ultima_password": fecha_ultima_password_str,
+                "especialidad": especialidad
+            }
+            return {"success": True, "medico": medico}
+        else:
+            return {"success": True, "message": "No se encontró ningún médico con ese ID"}
+    except Exception as e:
+        connection.rollback()
+        return {"success": False, "message": "Error inesperado: " + str(e)}
+    finally:
+        cursor.close()
+        connection.close()
+
+
+'''
 def consultar_medico_id(medico_id):
     connection = get_connection()
     cursor = connection.cursor()
@@ -104,10 +157,10 @@ def consultar_medico_id(medico_id):
     finally:
         cursor.close()
         connection.close()
-
+'''
 def obtener_clave_desde_Medico():
         try:
-            with open('keys/claveMedico.key', 'r') as archivo:
+            with open('./etc/secrets/claveMedico.key', 'r') as archivo:
                 clave = archivo.read().strip()
                 print(clave)
             return clave
