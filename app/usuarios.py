@@ -132,7 +132,7 @@ class Medico(Resource):
 
 			return response, 404  # Devuelve un error 404 si el médico no se encuentra
 
- 
+import psycopg2
 #@ns_usuarios.route('/admin/alta') se cambio
 @ns_usuarios.route('/registro')
 class Usuarios(Resource):
@@ -164,9 +164,22 @@ class Usuarios(Resource):
 			fecha_ultima_password = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
 			especialidad = args['especialidad']
 
+			
 			connection = get_connection()
 			with connection.cursor() as cursor:
-				
+				print('priemro')
+				cursor.execute("SELECT id FROM usuario WHERE dni = %s;", (dni,)) 
+				UsuarioExistente = cursor.fetchone()
+				if UsuarioExistente:
+					#print("dentro")
+					return {"message": "El Usuario DNI ya está registrado."}, 409
+				#print("hola")
+				#cursor.execute("SELECT COUNT(*) FROM usuario WHERE id>=77 and %s = pgp_sym_decrypt(email::bytea, %s, %s)::text;", (email,clave, arg2))
+				cursor.execute("SELECT EXISTS (SELECT 1 FROM usuario WHERE id >= 77 AND pgp_sym_decrypt(email::bytea, %s, %s) = %s) AS existe_correo;", (clave, arg2, email))
+				correoExistente= cursor.fetchone()[0]
+				if correoExistente:
+					return {"message": "Usuario email ya existe"}, 409
+					
 				consulta = "INSERT INTO public.usuario (nombre, dni, email, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad) VALUES (%s, %s,pgp_sym_encrypt(%s, %s, %s), %s, %s, %s, %s, %s) RETURNING id;"
 				cursor.execute(consulta, (nombre_apellido, dni, email, clave,arg2, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad))
 				new_user_id = cursor.fetchone()[0]
@@ -177,8 +190,10 @@ class Usuarios(Resource):
 
 			return {"message": "Agregado exitosamente", "user_id": new_user_id}, 201
 
-		except Exception as ex:
+		except psycopg2.Error as ex:
+    # Manejar excepciones específicas de PostgreSQL aquí
 			return {"message": str(ex)}, 500
+
 
 
 @ns_usuarios.route('/<string:dni>')
