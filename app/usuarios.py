@@ -19,6 +19,7 @@ ns_usuarios = Namespace("Usuarios")
 
 user_parser = api.parser()
 user_parser.add_argument('nombre', type=str, required=True, help='Nombre')
+user_parser.add_argument('apellido', type=str, required=True, help='Apellido')
 user_parser.add_argument('dni', type=str, required=True, help='DNI')
 user_parser.add_argument('email', type=str, required=True, help='email')
 #user_parser.add_argument('fecha_ultima_password', type=str, required=True, help='fecha')
@@ -28,7 +29,7 @@ user_parser.add_argument('email', type=str, required=True, help='email')
 #user_parser.add_argument('fecha_ultima_password', type=str, required=True, help='Nuevo fecha')
 user_parser.add_argument('password', type=str, required=True, help='Contraseña')
 user_parser.add_argument('rol_id', type=int, required=True, help='Rol ID')
-user_parser.add_argument('establecimiento_id', type=int, required=True, help='Id del establecimiento')
+user_parser.add_argument('establecimiento_id', type=int, required=False, help='Id del establecimiento (no necesario)')
 user_parser.add_argument('especialidad', type=str, required=True, help='especialidad')
 
 user_parser_update = api.parser()
@@ -131,8 +132,9 @@ class Medico(Resource):
 
 			return response, 404  # Devuelve un error 404 si el médico no se encuentra
 
-#from pgpy  
-@ns_usuarios.route('/admin/alta')
+ 
+#@ns_usuarios.route('/admin/alta') se cambio
+@ns_usuarios.route('/registro')
 class Usuarios(Resource):
 	@ns_usuarios.expect(user_parser)
 	def post(self):
@@ -148,7 +150,8 @@ class Usuarios(Resource):
 			
 			nombre = args['nombre']
 			dni = args['dni']
-			
+			apellido = args['apellido']
+			nombre_apellido = f"{nombre} {apellido}"
 			password = args['password']
 			rol_id = args['rol_id']
 			establecimiento_id = args['establecimiento_id']
@@ -165,7 +168,7 @@ class Usuarios(Resource):
 			with connection.cursor() as cursor:
 				
 				consulta = "INSERT INTO public.usuario (nombre, dni, email, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad) VALUES (%s, %s,pgp_sym_encrypt(%s, %s, %s), %s, %s, %s, %s, %s) RETURNING id;"
-				cursor.execute(consulta, (nombre, dni, email, clave,arg2, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad))
+				cursor.execute(consulta, (nombre_apellido, dni, email, clave,arg2, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad))
 				new_user_id = cursor.fetchone()[0]
 				connection.commit()
 
