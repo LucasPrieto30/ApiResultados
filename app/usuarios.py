@@ -1,5 +1,5 @@
 from flask_restx import Resource, Namespace, fields
-from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico
+from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico, login_model, login_model_response
 from flask import jsonify, request
 from app.models.entities.Historial import Historial
 from database.db import get_connection
@@ -10,7 +10,7 @@ from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico
 from flask_restx import Api
-from database.dto_medico import obtener_clave_desde_Medico
+from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword
 import argparse
 import datetime
 api = Api()
@@ -263,4 +263,34 @@ class UpdateUserInfo(Resource):
 
 		except Exception as ex:
 			return {"message": str(ex)}, 500
-		
+
+@ns_usuarios.response(200, 'Correcto. Bienvenido', login_model_response)
+@ns_usuarios.response(401, 'Contraseña incorrecta')
+@ns_usuarios.response(404, 'Usuario inexistente')
+@ns_usuarios.route('/login')
+class Login(Resource):
+	@ns_usuarios.expect(login_model, validate=True)
+	def post(self):
+		args = ns_usuarios.payload
+		dni = args['dni']
+		password = args['password']
+		usuarioExistente = checkUsuarioPorDni(dni)
+		if usuarioExistente:
+			# Verificar si el usuario tiene una contraseña valida (no expirada)
+			# if not validPassword(usuarioExistente[1]):
+			# 	return {'message' : 'La contraseña ha expirado'}, 403
+			# Comprobar que la contraseña es correcta
+			if not verificarPassword(password, usuarioExistente):
+				return {'message' : 'Contraseña incorrecta'}, 401
+			else:
+				usuario = {
+					'id': usuarioExistente[0],
+					'nombre': usuarioExistente[1],
+					'rol_id': usuarioExistente[2],
+					'dni': usuarioExistente[3],
+					'email': usuarioExistente[4],
+					'especialidad': usuarioExistente[6],
+					'establecimiento_id': usuarioExistente[7],
+				}
+				return usuario, 200
+		return {'message' : 'Usuario inexistente'}, 404

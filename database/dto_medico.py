@@ -254,3 +254,17 @@ def verificar_Usuario_rol_medico(valor):
             return True
 
     return False
+
+def checkUsuarioPorDni(dni):
+    clave_maestra= obtener_clave_desde_Medico()
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, nombre, rol_id, dni, pgp_sym_decrypt(email::bytea, %s, 'compress-algo=0,cipher-algo=AES128') AS email, password, especialidad, establecimiento_id, fecha_ultima_password FROM public.usuario where dni = %s", (clave_maestra, dni,))
+    usuarioBD = cursor.fetchone()
+    if usuarioBD:
+        return usuarioBD
+    else:
+        return None
+    
+def verificarPassword(password, usuarioExistente):
+    return len(usuarioExistente) > 5 and password == usuarioExistente[5]

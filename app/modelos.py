@@ -55,3 +55,19 @@ post_medico = api.model("PostMedico", {
     "especialidad": fields.String(required=True)
 })
 
+
+
+login_model = api.model('Login', {
+    'dni': fields.String(required=True, description='DNI del usuario'),
+    'password': fields.String(required=True, description='Contraseña del usuario'),
+})
+
+login_model_response = api.model('Usuario', {
+    'id': fields.Integer(description='ID del usuario'),
+    'nombre': fields.String(description='Nombre del usuario'),
+    'rol_id': fields.Integer(description='ID del rol del usuario'),
+    'dni': fields.String(description='DNI del usuario'),
+    'email': fields.String(description='Correo electrónico del usuario'),
+    'especialidad': fields.String(description='Especialidad del usuario'),
+    'establecimiento_id': fields.String(description='establecimiento_id del usuario'),
+})
