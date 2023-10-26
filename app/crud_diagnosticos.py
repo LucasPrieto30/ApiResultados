@@ -52,7 +52,7 @@ class CrudDiagnostico:
                 "fecha": fecha_actual,
                 "resultado": json.dumps(data), 
                 "usuario_id":  datos_diagnostico['id_usuario'], 
-                "id_medico": datos_diagnostico['id_medico'],
+                "dni_medico": datos_diagnostico['dni_medico'],
                 "id_modelo": datos_diagnostico['modelo_id']  
             }
             insert_diagnostico(nuevo_diagnostico)

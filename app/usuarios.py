@@ -29,7 +29,7 @@ user_parser.add_argument('email', type=str, required=True, help='email')
 #user_parser.add_argument('fecha_ultima_password', type=str, required=True, help='Nuevo fecha')
 user_parser.add_argument('password', type=str, required=True, help='Contraseña')
 user_parser.add_argument('rol_id', type=int, required=True, help='Rol ID')
-user_parser.add_argument('establecimiento_id', type=int, required=False, help='Id del establecimiento (no necesario)')
+user_parser.add_argument('establecimiento_id', type=int, required=False, help='Id del establecimiento')
 user_parser.add_argument('especialidad', type=str, required=True, help='especialidad')
 
 user_parser_update = api.parser()
@@ -184,7 +184,9 @@ class Usuarios(Resource):
 				cursor.execute(consulta, (nombre_apellido, dni, email, clave,arg2, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad))
 				new_user_id = cursor.fetchone()[0]
 				connection.commit()
-
+				if (rol_id == 4):
+					cursor.execute("UPDATE public.diagnostico SET usuario_medico_id = %s where usuario_medico_id IS NULL AND usuario_medico_dni = %s", (new_user_id, dni))
+					connection.commit()
 			cursor.close()
 			connection.close()
 

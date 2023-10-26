@@ -6,21 +6,26 @@ from psycopg2.extras import RealDictCursor
 # insertar diagnostico de modelo: cerebro
 def insert_diagnostico(datos_diagnostico):
     try:
-        connection=get_connection()
+        connection = get_connection()
         with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM usuario WHERE dni = %s", (datos_diagnostico.get("dni_medico"),))
+            medicoExiste = cursor.fetchone()
+            
             insert_query = """
-            INSERT INTO public.diagnostico(imagen, datos_complementarios, fecha, resultado, usuario_id, usuario_medico_id, modelo_id)
-            VALUES ( %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO public.diagnostico(imagen, datos_complementarios, fecha, resultado, usuario_id, modelo_id, usuario_medico_dni, usuario_medico_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_query, (
+            values = (
                 datos_diagnostico.get("imagen"),
                 datos_diagnostico.get("datos_complementarios"),
                 datos_diagnostico.get("fecha"),
                 datos_diagnostico.get("resultado"),
                 datos_diagnostico.get("usuario_id"),
-                datos_diagnostico.get("id_medico"),
                 datos_diagnostico.get("id_modelo"),
-            ))
+                datos_diagnostico.get("dni_medico"),
+                medicoExiste[0] if medicoExiste else None,
+            )
+            cursor.execute(insert_query, values)
             connection.commit()
     except Exception as e:
         connection.rollback()
@@ -32,7 +37,7 @@ def obtener_diagnostico(id_diagnostico, rol):
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT d.id, d.imagen, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_id, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_id = me.id WHERE d.id=%s;', (id_diagnostico,))
+            cursor.execute(f'SELECT d.id, d.imagen, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni WHERE d.id=%s;', (id_diagnostico,))
             
             row = cursor.fetchone()
 
@@ -47,13 +52,13 @@ def obtener_diagnostico(id_diagnostico, rol):
                     "fecha": row[3].strftime("%Y-%m-%d %H:%M:%S"),
                     #"resultado": row[4],
                     "usuario_id": row[5],
-                    "usuario_medico_id": row[6],
+                    "usuario_medico_dni": row[6],
                     "modelo_id": row[7],
                     "nombre_usuario": row[8],
                     "modelo_nombre": row[9],
                     "nombre_medico": row[10],
                 }
-                if int(rol) == 4:
+                if int(rol) == 4 or int(rol) == 1:
                     diagnostico["resultado"] = row[4]
 
             connection.close()

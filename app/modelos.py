@@ -31,7 +31,7 @@ diag_parser_cerebro.add_argument('perdida_visual', type=bool, required=True, hel
 diag_parser_cerebro.add_argument('debilidad_focal', type=bool, required=True, help='debilidad_focal')
 diag_parser_cerebro.add_argument('convulsiones', type=bool, required=True, help='Convulsiones')
 diag_parser_cerebro.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
-diag_parser_cerebro.add_argument('id_medico', type=int, required=True, help='ID de médico')
+diag_parser_cerebro.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
 
 # parametros para diagnostico del modelo: pulmones
 diag_parser_pulmones = reqparse.RequestParser()
@@ -40,14 +40,14 @@ diag_parser_pulmones.add_argument('puntada_lateral', type=bool, required=True, h
 diag_parser_pulmones.add_argument('fiebre', type=bool, required=True, help='fiebre')
 diag_parser_pulmones.add_argument('dificultad_respiratoria', type=bool, required=True, help='dificultad_respiratoria')
 diag_parser_pulmones.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
-diag_parser_pulmones.add_argument('id_medico', type=int, required=True, help='ID de médico')
+diag_parser_pulmones.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
 
 
 # parametros para diagnostico del modelo: corazon
 diag_parser_corazon = reqparse.RequestParser()
 diag_parser_corazon.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
 diag_parser_corazon.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
-diag_parser_corazon.add_argument('id_medico', type=int, required=True, help='ID de médico')
+diag_parser_corazon.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
 
 from datetime import datetime
 
