@@ -33,6 +33,8 @@ class CrudDiagnostico:
                     'fiebre': datos_diagnostico['fiebre'],
                     'dificultad_respiratoria': datos_diagnostico['dificultad_respiratoria']
                 }
+            elif(datos_diagnostico['modelo_id'] == 3):
+                datos_complementarios = {}
 
             # Convertir el diccionario a formato JSON
             datos_complementarios_json = json.dumps(datos_complementarios)

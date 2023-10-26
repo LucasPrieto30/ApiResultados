@@ -42,6 +42,13 @@ diag_parser_pulmones.add_argument('dificultad_respiratoria', type=bool, required
 diag_parser_pulmones.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
 diag_parser_pulmones.add_argument('id_medico', type=int, required=True, help='ID de médico')
 
+
+# parametros para diagnostico del modelo: corazon
+diag_parser_corazon = reqparse.RequestParser()
+diag_parser_corazon.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
+diag_parser_corazon.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
+diag_parser_corazon.add_argument('id_medico', type=int, required=True, help='ID de médico')
+
 from datetime import datetime
 
 post_medico = api.model("PostMedico", {

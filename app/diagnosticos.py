@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields, api, reqparse
 import psycopg2
-from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from app.models.entities.Historial import Historial
@@ -176,6 +176,41 @@ class PruebaImagen(Resource):
             # Procesar la respuesta
             if response.status_code == 200:
                 # Si la respuesta es JSON, puedes cargarla como un diccionario
+                data = response.json()
+                # guarda el diagnostico cuando se obtiene el response
+                crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                return data, 200
+            else:
+                return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
+        except Exception as ex:
+            return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
+        
+@ns2.route('/predecir/corazon')
+class PruebaImagen(Resource):
+    @ns.expect(diag_parser_corazon)
+    def post(self):
+        nuevo_diagnostico = diag_parser_corazon.parse_args()
+        nuevo_diagnostico["modelo_id"] = 3             
+        img = request.files['imagen']
+       
+        filename = ""
+        if img and allowed_file(img.filename):
+            filename = secure_filename(img.filename)
+            img.save(os.path.join('app/static', filename))
+        else:
+            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+
+        try:
+            url = 'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict'
+        
+            with open(os.path.join('app/static', filename), 'rb') as file:
+                image_data = file.read()
+            
+            files = {'file': (filename, image_data, 'image/jpeg')}
+
+            response = requests.post(url, files=files) 
+    
+            if response.status_code == 200:
                 data = response.json()
                 # guarda el diagnostico cuando se obtiene el response
                 crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
