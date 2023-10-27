@@ -110,8 +110,14 @@ class PruebaImagen(Resource):
         }
 
         try:
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT (MAX(id) + 1) as siguiente_id FROM public.diagnostico;")
+                siguiente_id = cursor.fetchone()[0]
+                cursor.close()
+                connection.close()
             # URL de la API externa a la que deseas enviar la imagen
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}'
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}&id_image={siguiente_id}'
             
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
@@ -160,8 +166,14 @@ class PruebaImagen(Resource):
         }
 
         try:
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT (MAX(id) + 1) as siguiente_id FROM public.diagnostico;")
+                siguiente_id = cursor.fetchone()[0]
+                cursor.close()
+                connection.close()
             # URL de la API externa a la que deseas enviar la imagen
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/wini?puntada_lateral={datos["puntada_lateral"]}&fiebre={datos["fiebre"]}&dificultad_respiratoria={datos["dificultad_respiratoria"]}'
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/wini?puntada_lateral={datos["puntada_lateral"]}&fiebre={datos["fiebre"]}&dificultad_respiratoria={datos["dificultad_respiratoria"]}&id_image={siguiente_id}'
             
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
