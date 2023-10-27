@@ -13,6 +13,7 @@ from flask_restx import Api
 from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword
 import argparse
 import datetime
+import re
 api = Api()
 
 ns_usuarios = Namespace("Usuarios")
@@ -141,7 +142,7 @@ class Usuarios(Resource):
 		try:
 			args = user_parser.parse_args()
 			#Define el email y la clave
-			email = args['email']
+			email = args['email'].lower()
 			clave = obtener_clave_desde_Medico()
 			#resultado = f"pgp_sym_encrypt('{email}', '1', 'compress-algo=0,cipher-algo=AES128')"
 			#arg1 = "1"
@@ -167,7 +168,11 @@ class Usuarios(Resource):
 			
 			connection = get_connection()
 			with connection.cursor() as cursor:
-				print('priemro')
+				#print('priemro')
+				if not dni.isdigit():
+					return {"message": "DNI debe ser una cadena de números"}, 400
+				if not re.match(r"[^@]+@[^@]+\.[a-z]+", email):
+					return {"message": "Formato de email no válido"}, 400
 				cursor.execute("SELECT id FROM usuario WHERE dni = %s;", (dni,)) 
 				UsuarioExistente = cursor.fetchone()
 				if UsuarioExistente:
