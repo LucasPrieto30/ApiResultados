@@ -51,7 +51,10 @@ Retorna un JSON con las predicciones.
 Ademas guarda los datos de la consulta con su resultado en la base de datos.
 
 Ejemplo de uso:
-![image]()
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/117873822/657d231f-468c-49eb-aca7-31a9937b59d5)
+
+
+
 
 #### /Diagnosticos/historial [GET]
 
