@@ -41,6 +41,17 @@ Ademas guarda los datos de la consulta con su resultado en la base de datos.
 Ejemplo de uso:
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/f7bc1b27-1c54-4d7b-88db-d0d592f8374d)
 
+#### /Diagnosticos/predecir/corazon [POST]
+
+El objetivo de este endpoint es comunicarse con el modelo de corazon para obtener las probabilidades de tener o no una enfermedad cardíaca.
+Recibe la imagen, el id del usuario que realizo la consulta y el id del medico al que se cargará
+el diagnóstico en su nombre.
+Retorna un JSON con las predicciones.
+
+Ademas guarda los datos de la consulta con su resultado en la base de datos.
+
+Ejemplo de uso:
+![image]()
 
 #### /Diagnosticos/historial [GET]
 
