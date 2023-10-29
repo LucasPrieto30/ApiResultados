@@ -117,6 +117,8 @@ class PruebaImagen(Resource):
             with connection.cursor() as cursor:
                 cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
                 siguiente_imagen_id = cursor.fetchone()[0]
+                if (siguiente_imagen_id is None):
+                    siguiente_imagen_id = 1
                 nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
                 cursor.close()
                 connection.close()
@@ -174,6 +176,8 @@ class PruebaImagen(Resource):
             with connection.cursor() as cursor:
                 cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
                 siguiente_imagen_id = cursor.fetchone()[0]
+                if (siguiente_imagen_id is None):
+                    siguiente_imagen_id = 1
                 nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
                 cursor.close()
                 connection.close()
@@ -220,6 +224,8 @@ class PruebaImagen(Resource):
         with connection.cursor() as cursor:
             cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
             siguiente_imagen_id = cursor.fetchone()[0]
+            if (siguiente_imagen_id is None):
+                siguiente_imagen_id = 1
             nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
         try:
             url = 'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict'
