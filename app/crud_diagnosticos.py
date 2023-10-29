@@ -48,6 +48,7 @@ class CrudDiagnostico:
             # crear un diagnóstico con los datos
             nuevo_diagnostico = {
                 "imagen": img_encoded,
+                "imagen_id": datos_diagnostico['imagen_id'],
                 "datos_complementarios": datos_complementarios_json,
                 "fecha": fecha_actual,
                 "resultado": json.dumps(data), 

@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields, api, reqparse
 import psycopg2
-from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from app.models.entities.Historial import Historial
@@ -16,6 +16,8 @@ import random
 
 ns = Namespace("Pruebas")
 ns2 = Namespace("Diagnosticos")
+feedbackNs = Namespace("Feedback")
+
 crud = CrudDiagnostico()
 parser = reqparse.RequestParser()
 parser.add_argument('rol_id', required=True, help='Clave de acceso', location='args')  # 'args' indica que es un parámetro de consulta
@@ -40,7 +42,7 @@ class HistorialResource(Resource):
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                query_sql = 'SELECT d.id, d.imagen, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni'
+                query_sql = 'SELECT d.id, d.imagen_id, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico, i.imagen as imagen FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.imagen_analisis as i ON d.imagen_id = i.imagen_id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni'
 
                 if verificar_Usuario_rol_medico(rol_id):
                     cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
@@ -60,7 +62,7 @@ class HistorialResource(Resource):
             for diagnostico in historial:
                 diagnostico_dict = {
                     "id": diagnostico[0],
-                    "imagen": base64.b64encode(base64.b64decode(diagnostico[1])).decode('utf-8'),
+                    "imagen_id": diagnostico[1],
                     "datos_complementarios": diagnostico[2],
                     "fecha": diagnostico[3].strftime("%Y-%m-%d %H:%M:%S"),
                     "usuario_id": diagnostico[5],
@@ -68,7 +70,8 @@ class HistorialResource(Resource):
                     "modelo_id": diagnostico[7],
                     "nombre_usuario": diagnostico[8],
                     "modelo_nombre": diagnostico[9],
-                    "nombre_medico": diagnostico[10]
+                    "nombre_medico": diagnostico[10],
+                    "imagen": base64.b64encode(base64.b64decode(diagnostico[11])).decode('utf-8')
                 }
 
                 # Verificar el rol y agregar o excluir la columna "resultado"
@@ -112,12 +115,13 @@ class PruebaImagen(Resource):
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT (MAX(id) + 1) as siguiente_id FROM public.diagnostico;")
-                siguiente_id = cursor.fetchone()[0]
+                cursor.execute("SELECT (MAX(imagid) + 1) as siguiente_id FROM public.imagen_analisis;")
+                siguiente_imagen_id = cursor.fetchone()[0]
+                nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
                 cursor.close()
                 connection.close()
             # URL de la API externa a la que deseas enviar la imagen
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}&id_image={siguiente_id}'
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}&id_image={siguiente_imagen_id}'
             
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
@@ -168,12 +172,13 @@ class PruebaImagen(Resource):
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT (MAX(id) + 1) as siguiente_id FROM public.diagnostico;")
-                siguiente_id = cursor.fetchone()[0]
+                cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
+                siguiente_imagen_id = cursor.fetchone()[0]
+                nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
                 cursor.close()
                 connection.close()
             # URL de la API externa a la que deseas enviar la imagen
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/wini?puntada_lateral={datos["puntada_lateral"]}&fiebre={datos["fiebre"]}&dificultad_respiratoria={datos["dificultad_respiratoria"]}&id_image={siguiente_id}'
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/wini?puntada_lateral={datos["puntada_lateral"]}&fiebre={datos["fiebre"]}&dificultad_respiratoria={datos["dificultad_respiratoria"]}&id_image={siguiente_imagen_id}'
             
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
@@ -211,7 +216,11 @@ class PruebaImagen(Resource):
             img.save(os.path.join('app/static', filename))
         else:
             return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
-
+        connection = get_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
+            siguiente_imagen_id = cursor.fetchone()[0]
+            nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
         try:
             url = 'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict'
         
@@ -281,7 +290,7 @@ class Imagen(Resource):
 
         try:
             # Realizar una consulta para obtener la imagen
-            cursor.execute("SELECT imagen FROM diagnostico WHERE id = %s", (diagnostico_id,))
+            cursor.execute("SELECT i.imagen FROM diagnostico d INNER JOIN public.imagen_analisis on d.imagen_id = i.imagen_id WHERE d.id = %s", (diagnostico_id,))
             imagen = cursor.fetchone()
 
             if imagen:
