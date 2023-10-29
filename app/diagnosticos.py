@@ -122,7 +122,7 @@ class PruebaImagen(Resource):
                 connection.close()
             # URL de la API externa a la que deseas enviar la imagen
             url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}&id_image={siguiente_imagen_id}'
-            
+            print(url)
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
                 image_data = file.read()
@@ -132,7 +132,7 @@ class PruebaImagen(Resource):
 
             # Realizar la solicitud POST con los datos y la imagen
             response = requests.post(url, files=files) # data= datos
-
+            print(response)
             # Procesar la respuesta
             if response.status_code == 200:
                 # Si la respuesta es JSON, puedes cargarla como un diccionario
