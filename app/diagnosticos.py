@@ -115,7 +115,7 @@ class PruebaImagen(Resource):
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT (MAX(imagid) + 1) as siguiente_id FROM public.imagen_analisis;")
+                cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
                 siguiente_imagen_id = cursor.fetchone()[0]
                 nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
                 cursor.close()
