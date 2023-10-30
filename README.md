@@ -84,7 +84,8 @@ Ejemplo de uso:
 Obtiene un diagnostico realizado a traves de su id.
 
 Ejemplo de uso
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/25436270-3a5f-47c1-b936-a6f5d59f13c6)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/839b3941-d531-4f59-9d87-88c6c810f209)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/57924e0c-6b33-49be-84dc-b2f281030593)
 
 #### /Diagnosticos/Delete/{id_diagnostico} [DELETE]
 
