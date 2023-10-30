@@ -60,9 +60,24 @@ Ejemplo de uso:
 
 Obtiene el historial de diagnosticos. Si el que realiza la consulta es un auditor devuelve todos los diagnosticos guardados. Si es un medico devuelve los diagnosticos cargados a su nombre.
 Recibe id de usuario y id de rol.
+De cada diagnostico incluye la siguiente información:
+- id
+- imagen_id
+- datos_complementarios
+- fecha
+- usuario_id
+- usuario_medico_dni
+- modelo_id
+- nombre_usuario
+- modelo_nombre
+- nombre_medico
+- imagen
+- resultado
 
 Ejemplo de uso:
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/3e7252eb-fce7-42de-90c4-24eee6a2ca12)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/becfef2b-9888-49b5-a52e-7b576e4fc313)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/bfb92b51-a293-49fa-b78a-3c6aaab69bce)
+
 
 #### /Diagnosticos/{id_diagnostico} [GET]
 
