@@ -296,7 +296,7 @@ class Imagen(Resource):
 
         try:
             # Realizar una consulta para obtener la imagen
-            cursor.execute("SELECT i.imagen FROM diagnostico d INNER JOIN public.imagen_analisis on d.imagen_id = i.imagen_id WHERE d.id = %s", (diagnostico_id,))
+            cursor.execute("SELECT i.imagen FROM public.diagnostico as d INNER JOIN public.imagen_analisis as i on d.imagen_id = i.imagen_id WHERE d.id = %s", (diagnostico_id,))
             imagen = cursor.fetchone()
 
             if imagen:
