@@ -19,7 +19,7 @@ Recibe la imagen, tres valores booleanos si tiene convulsiones, si tiene pérdid
 el diagnostico en su nombre.
 Retorna un JSON con las probabilidades de cada clase. Las clases son las siguientes:
 - Glioma
--Meningioma
+- Meningioma
 - Pituitary
 - No_tumor
 Ademas guarda los datos de la consulta con su resultado en la base de datos.
@@ -52,8 +52,6 @@ Ademas guarda los datos de la consulta con su resultado en la base de datos.
 
 Ejemplo de uso:
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/117873822/657d231f-468c-49eb-aca7-31a9937b59d5)
-
-
 
 
 #### /Diagnosticos/historial [GET]
@@ -156,8 +154,22 @@ Ejemplo de uso:
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/299e09c6-4172-45d1-813e-aaca9b3e2986)
 
 
+### Feedback
+
+#### /Feedback/cerebro
+
+Realiza el feedback al modelo de cerebro. Se debe enviar el id de la imagen del diagnostico y una de las etiquetas (glioma, meningioma, pituitary o no_tumor) en "true".
+
+Ejemplo de uso:
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/95fa3685-37ac-446e-a8d2-34409876fd9c)
 
 
+#### /Feedback/pulmones
+
+Realiza el feedback al modelo de pulmones. Se debe enviar el id de la imagen del diagnostico y una de las etiquetas (pneumonia  o no_pneumonia) en "true".
+
+Ejemplo de uso:
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/6e5ce919-16b0-4cc1-b9d7-97f153dcb41c)
 
 
 
