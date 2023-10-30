@@ -8,7 +8,7 @@ import os
 import pytz
 from psycopg2 import Binary
 import requests
-from .crud_medico import CrudMedico
+from .crud_medico import CrudMedico , validar_contrasena
 from flask_restx import Api
 from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword
 import argparse
@@ -163,8 +163,9 @@ class Usuarios(Resource):
 			fecha_hora_argentina = datetime.datetime.now(zona_horaria_argentina)
 			# Obtener la fecha actual
 			fecha_ultima_password = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
-			especialidad = args['especialidad']
-
+			especialidad = args['especialidad']      
+			if (error := validar_contrasena(password)) is not None:
+				return {"message": error}, 400
 			
 			connection = get_connection()
 			with connection.cursor() as cursor:
