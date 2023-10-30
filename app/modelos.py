@@ -78,3 +78,15 @@ login_model_response = api.model('Usuario', {
     'especialidad': fields.String(description='Especialidad del usuario'),
     'establecimiento_id': fields.String(description='establecimiento_id del usuario'),
 })
+
+feedback_cerebro_args = reqparse.RequestParser()
+feedback_cerebro_args.add_argument('imagen_id', type=int, required=True, help='Imagen id')
+feedback_cerebro_args.add_argument('glioma', type=bool, required=False, help='glioma')
+feedback_cerebro_args.add_argument('meningioma', type=bool, required=False, help='meningioma')
+feedback_cerebro_args.add_argument('pituitary', type=bool, required=False, help='pituitary')
+feedback_cerebro_args.add_argument('no_tumor', type=bool, required=False, help='no_tumor')
+
+feedback_pulmones_args = reqparse.RequestParser()
+feedback_pulmones_args.add_argument('imagen_id', type=int, required=True, help='Imagen id')
+feedback_pulmones_args.add_argument('pneumonia', type=bool, required=False, help='pneumonia')
+feedback_pulmones_args.add_argument('no_pneumonia', type=bool, required=False, help='no_pneumonia')

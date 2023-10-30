@@ -19,7 +19,7 @@ Recibe la imagen, tres valores booleanos si tiene convulsiones, si tiene pérdid
 el diagnostico en su nombre.
 Retorna un JSON con las probabilidades de cada clase. Las clases son las siguientes:
 - Glioma
--Meningioma
+- Meningioma
 - Pituitary
 - No_tumor
 Ademas guarda los datos de la consulta con su resultado en la base de datos.
@@ -54,22 +54,36 @@ Ejemplo de uso:
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/117873822/657d231f-468c-49eb-aca7-31a9937b59d5)
 
 
-
-
 #### /Diagnosticos/historial [GET]
 
 Obtiene el historial de diagnosticos. Si el que realiza la consulta es un auditor devuelve todos los diagnosticos guardados. Si es un medico devuelve los diagnosticos cargados a su nombre.
 Recibe id de usuario y id de rol.
+De cada diagnostico incluye la siguiente información:
+- id
+- imagen_id
+- datos_complementarios
+- fecha
+- usuario_id
+- usuario_medico_dni
+- modelo_id
+- nombre_usuario
+- modelo_nombre
+- nombre_medico
+- imagen
+- resultado
 
 Ejemplo de uso:
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/3e7252eb-fce7-42de-90c4-24eee6a2ca12)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/becfef2b-9888-49b5-a52e-7b576e4fc313)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/bfb92b51-a293-49fa-b78a-3c6aaab69bce)
+
 
 #### /Diagnosticos/{id_diagnostico} [GET]
 
 Obtiene un diagnostico realizado a traves de su id.
 
 Ejemplo de uso
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/25436270-3a5f-47c1-b936-a6f5d59f13c6)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/839b3941-d531-4f59-9d87-88c6c810f209)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/57924e0c-6b33-49be-84dc-b2f281030593)
 
 #### /Diagnosticos/Delete/{id_diagnostico} [DELETE]
 
@@ -79,6 +93,13 @@ Ejemplo de uso
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/a6abdd5d-081b-45c3-b065-dacbf6b6b46f)
 
 ### Usuarios
+
+#### /Usuarios/login [POST]
+Realiza el login de un usuario mediante su dni y contraseña
+
+Ejemplo de uso:
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/d95d697a-d3c4-44a1-91e4-2d9bdb919535)
+
 
 #### /Usuarios/medicos [GET]
 
@@ -94,19 +115,21 @@ Obtiene el usuario por su id
 Ejemplo de uso
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/0349c2dc-4b54-4172-8fc2-8423c7ce934a)
 
-#### /Usuarios/admin/alta [POST]
+#### /Usuarios/registro [POST]
 
 Crea un usuario. Los datos que espera son:
   - "nombre": "string",
+  - "apellido: "string",
   - "dni": "string",
   - "email": "string",
   - "password": "string",
-  - "rol_id": 0,
-  - "establecimiento_id": 0,
+  - "rol_id": int,
+  - "establecimiento_id": int,
   - "especialidad": "string"
 
 Ejemplo de uso
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/b102f487-f263-4df9-aae3-fcd9d11664ce)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/230e89f6-520d-4861-babb-4d7b981d61fc)
+
 
 #### /Usuarios/update-user-informacion [PATCH]
 
@@ -131,8 +154,22 @@ Ejemplo de uso:
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/299e09c6-4172-45d1-813e-aaca9b3e2986)
 
 
+### Feedback
+
+#### /Feedback/cerebro
+
+Realiza el feedback al modelo de cerebro. Se debe enviar el id de la imagen del diagnostico y una de las etiquetas (glioma, meningioma, pituitary o no_tumor) en "true".
+
+Ejemplo de uso:
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/95fa3685-37ac-446e-a8d2-34409876fd9c)
 
 
+#### /Feedback/pulmones
+
+Realiza el feedback al modelo de pulmones. Se debe enviar el id de la imagen del diagnostico y una de las etiquetas (pneumonia  o no_pneumonia) en "true".
+
+Ejemplo de uso:
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/6e5ce919-16b0-4cc1-b9d7-97f153dcb41c)
 
 
 

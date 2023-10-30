@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields, api, reqparse
 import psycopg2
-from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_pulmones_args
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from database.db import get_connection
@@ -301,7 +301,7 @@ class Imagen(Resource):
 
         try:
             # Realizar una consulta para obtener la imagen
-            cursor.execute("SELECT i.imagen FROM diagnostico d INNER JOIN public.imagen_analisis on d.imagen_id = i.imagen_id WHERE d.id = %s", (diagnostico_id,))
+            cursor.execute("SELECT i.imagen FROM public.diagnostico as d INNER JOIN public.imagen_analisis as i on d.imagen_id = i.imagen_id WHERE d.id = %s", (diagnostico_id,))
             imagen = cursor.fetchone()
 
             if imagen:
@@ -341,3 +341,48 @@ class Imagen(Resource):
         finally:
             cursor.close()
             connection.close()
+
+@feedbackNs.route('/cerebro')
+class FeedbackCerebro(Resource):
+    @feedbackNs.expect(feedback_cerebro_args)
+    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    def post(self):
+        feedback = feedback_cerebro_args.parse_args()
+        feedback["glioma"] = request.values.get('glioma') is not None and request.values.get('glioma').lower() == 'true' 
+        feedback["meningioma"] = request.values.get('meningioma') is not None and request.values.get('meningioma').lower() == 'true' 
+        feedback["pituitary"] = request.values.get('pituitary') is not None and request.values.get('pituitary').lower() == 'true' 
+        feedback["no_tumor"] = request.values.get('no_tumor') is not None and request.values.get('no_tumor').lower() == 'true' 
+        feedback["imagen_id"] = request.values.get('imagen_id')
+        try:
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/feedback/fred?id_image={feedback["imagen_id"]}&glioma={feedback["glioma"]}&meningioma={feedback["meningioma"]}&pituitary={feedback["pituitary"]}&no_tumor={feedback["no_tumor"]}'
+            response = requests.post(url) # data= datos
+            # Procesar la respuesta
+            if response.status_code == 200:
+                data = response.json()
+                return {"message": "Feedback enviado correctamente"}, 200
+            elif response.status_code == 404:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+        except Exception as ex:
+           return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
+
+@feedbackNs.route('/pulmones')
+class FeedbackPulmones(Resource):
+    @feedbackNs.expect(feedback_pulmones_args)
+    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    def post(self):
+        feedback = feedback_pulmones_args.parse_args()
+        feedback["pneumonia"] = request.values.get('pneumonia') is not None and request.values.get('pneumonia').lower() == 'true' 
+        feedback["no_pneumonia"] = request.values.get('no_pneumonia') is not None and request.values.get('no_pneumonia').lower() == 'true' 
+        feedback["imagen_id"] = request.values.get('imagen_id')
+        print(feedback)
+        try:
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/feedback/wini?id_image={feedback["imagen_id"]}&pneumonia={feedback["pneumonia"]}&no_pneumonia={feedback["no_pneumonia"]}'
+            print(url)
+            response = requests.post(url)
+            # Procesar la respuesta
+            if response.status_code == 200:
+                return {"message": "Feedback enviado correctamente"}, 200
+            elif response.status_code == 404:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+        except Exception as ex:
+           return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
