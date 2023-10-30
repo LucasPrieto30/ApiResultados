@@ -4,7 +4,6 @@ import psycopg2
 from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
-from app.models.entities.Historial import Historial
 from database.db import get_connection
 from database.dto_medico import verificar_Usuario_rol_medico
 from werkzeug.utils import secure_filename
@@ -32,7 +31,8 @@ def allowed_file(filename):
 
 @ns2.route('/historial')
 class HistorialResource(Resource):
-    @ns.expect(historial_parser)
+    @ns2.doc(responses={200: 'Éxito', 400: 'Solicitud inválida', 500: 'Error interno del servidor'})
+    @ns2.expect(historial_parser)
     def get(self):
         args = historial_parser.parse_args()
 
@@ -89,7 +89,8 @@ class HistorialResource(Resource):
 
 @ns2.route('/predecir/cerebro')
 class PruebaImagen(Resource):
-    @ns.expect(diag_parser_cerebro)
+    @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
+    @ns2.expect(diag_parser_cerebro)
     def post(self):
         nuevo_diagnostico = diag_parser_cerebro.parse_args()
         nuevo_diagnostico["debilidad_focal"] = request.values.get('debilidad_focal').lower() == 'true' 
@@ -104,7 +105,7 @@ class PruebaImagen(Resource):
             filename = secure_filename(img.filename)
             img.save(os.path.join('app/static', filename))
         else:
-            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}, 400
 
         datos = {
             'perdida_visual':nuevo_diagnostico['perdida_visual'],
@@ -149,7 +150,8 @@ class PruebaImagen(Resource):
         
 @ns2.route('/predecir/pulmones')
 class PruebaImagen(Resource):
-    @ns.expect(diag_parser_pulmones)
+    @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
+    @ns2.expect(diag_parser_pulmones)
     def post(self):
         nuevo_diagnostico = diag_parser_pulmones.parse_args()
         nuevo_diagnostico["puntada_lateral"] = request.values.get('puntada_lateral').lower() == 'true' 
@@ -208,7 +210,8 @@ class PruebaImagen(Resource):
         
 @ns2.route('/predecir/corazon')
 class PruebaImagen(Resource):
-    @ns.expect(diag_parser_corazon)
+    @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
+    @ns2.expect(diag_parser_corazon)
     def post(self):
         nuevo_diagnostico = diag_parser_corazon.parse_args()
         nuevo_diagnostico["modelo_id"] = 3             
@@ -250,7 +253,7 @@ class PruebaImagen(Resource):
 @ns2.route("/<int:id_diagnostico>")
 class DiagnosticoResource(Resource):
     @ns2.expect(parser)
-    @ns2.doc(responses={200: 'Éxito', 204: 'No existe diagnostico con el id seleccionado'})
+    @ns2.doc(responses={200: 'Éxito', 404: 'No existe diagnostico con el id seleccionado'})
     def get(self, id_diagnostico):
         args = parser.parse_args()
         rol = args['rol_id']
@@ -259,10 +262,11 @@ class DiagnosticoResource(Resource):
         if diagnostico:
             return diagnostico, 200
         else:
-            return {"message": "No existe diagnóstico con id" + str(id_diagnostico)}, 204
+            return {"message": "No existe diagnóstico con id" + str(id_diagnostico)}, 404
 
 @ns2.route("/Delete/<int:id_diagnostico>")
 class DiagnosticoDeleteResource(Resource):
+    @ns2.doc(responses={200: 'Diagnóstico eliminado correctamente', 500: 'No se pudo eliminar el diagnóstico'})
     def delete(self,id_diagnostico):
         #diagnostico = crud.resetear_diagnosticos()
         if crud.eliminar_diagnostico(id_diagnostico):
@@ -289,6 +293,7 @@ from PIL import Image
 
 @ns.route('/imagen/<int:diagnostico_id>')
 class Imagen(Resource):
+    @ns.doc(responses={200: 'Éxito', 500: 'Error interno del servidor', 404: 'Imagen no encontrada'})
     def get(self, diagnostico_id):
         # Realizar una conexión a la base de datos
         connection = get_connection()

@@ -1,7 +1,6 @@
 from flask_restx import Resource, Namespace, fields
 from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico, login_model, login_model_response
 from flask import jsonify, request
-from app.models.entities.Historial import Historial
 from database.db import get_connection
 from werkzeug.utils import secure_filename
 import os
@@ -47,6 +46,7 @@ user_parser_update.add_argument('especialidad', type=str, required=False, help='
 crud2 = CrudMedico()
 
 @ns_usuarios.route('/medicos')
+@ns_usuarios.doc(responses={200: 'Éxito', 500: 'Error interno del servidor'})
 class Medicos(Resource):
     def get(self):
         try:
@@ -138,6 +138,7 @@ import psycopg2
 @ns_usuarios.route('/registro')
 class Usuarios(Resource):
 	@ns_usuarios.expect(user_parser)
+	@ns_usuarios.doc(responses={201: 'Agregado exitosamente', 409: 'El usuario ya está registrado', 400: 'Solicitud inválida', 500: 'Error interno del servidor'})
 	def post(self):
 		try:
 			args = user_parser.parse_args()
@@ -207,9 +208,9 @@ class Usuarios(Resource):
 
 @ns_usuarios.route('/<string:dni>')
 class Usuario(Resource):
+	@ns_usuarios.doc(responses={200: 'Borrado exitosamente', 404: 'Médico no encontrado', 500: 'Error interno del servidor'})
 	def delete(self, dni):
 		try:
-
 			connection = get_connection()
 			with connection.cursor() as cursor:
 				cursor.execute("SELECT id FROM public.usuario WHERE dni = %s", (dni,))
@@ -232,6 +233,7 @@ class Usuario(Resource):
 		
 @ns_usuarios.route('/update-user-informacion', methods=['PATCH'])
 class UpdateUserInfo(Resource):
+	@ns_usuarios.doc(responses={200: 'Información de usuario actualizada', 404: 'Médico no encontrado', 500: 'Error interno del servidor'})
 	@ns_usuarios.expect(user_parser_update)
 	def patch(self):
 		try:
