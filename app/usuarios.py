@@ -164,7 +164,8 @@ class Usuarios(Resource):
 			# Obtener la fecha actual
 			fecha_ultima_password = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
 			especialidad = args['especialidad']      
-			if (error := validar_contrasena(password)) is not None:
+			error = validar_contrasena(password)
+			if error is not None:
 				return {"message": error}, 400
 			
 			connection = get_connection()

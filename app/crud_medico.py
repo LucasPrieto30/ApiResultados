@@ -29,9 +29,9 @@ def validar_contrasena(contrasena):
         return "La contraseña debe contener al menos una letra minúscula."
     if not any(c.isdigit() for c in contrasena):
         return "La contraseña debe contener al menos un número."
-    caracteres_especiales_permitidos = "!@#$%^&*()_+{}[]:;<>,.?~|/"
-    if not any(c in caracteres_especiales_permitidos for c in contrasena):
-        return "La contraseña debe contener al menos un carácter especial (por ejemplo, !@#$%^&*()_+{}[]:;<>,.?~|/)."
+    # caracteres_especiales_permitidos = "!@#$%^&*()_+{}[]:;<>,.?~|/"
+    # if not any(c in caracteres_especiales_permitidos for c in contrasena):
+    #     return "La contraseña debe contener al menos un carácter especial (por ejemplo, !@#$%^&*()_+{}[]:;<>,.?~|/)."
     caracteres_no_validos_permitidos = "↓↑→↨←§∟↔*"
     if any(c in contrasena for c in caracteres_no_validos_permitidos):
         return "La contraseña contiene caracteres no válidos."
