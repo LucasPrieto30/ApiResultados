@@ -96,6 +96,13 @@ Ejemplo de uso
 
 ### Usuarios
 
+#### /Usuarios/login [POST]
+Realiza el login de un usuario mediante su dni y contraseña
+
+Ejemplo de uso:
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/d95d697a-d3c4-44a1-91e4-2d9bdb919535)
+
+
 #### /Usuarios/medicos [GET]
 
 Obtiene los usuario con rol de médico
@@ -110,19 +117,21 @@ Obtiene el usuario por su id
 Ejemplo de uso
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/0349c2dc-4b54-4172-8fc2-8423c7ce934a)
 
-#### /Usuarios/admin/alta [POST]
+#### /Usuarios/registro [POST]
 
 Crea un usuario. Los datos que espera son:
   - "nombre": "string",
+  - "apellido: "string",
   - "dni": "string",
   - "email": "string",
   - "password": "string",
-  - "rol_id": 0,
-  - "establecimiento_id": 0,
+  - "rol_id": int,
+  - "establecimiento_id": int,
   - "especialidad": "string"
 
 Ejemplo de uso
-![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/b102f487-f263-4df9-aae3-fcd9d11664ce)
+![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/230e89f6-520d-4861-babb-4d7b981d61fc)
+
 
 #### /Usuarios/update-user-informacion [PATCH]
 
