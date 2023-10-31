@@ -327,7 +327,7 @@ class Login(Resource):
 					'especialidad': usuarioExistente[6],
 					'establecimiento_id': usuarioExistente[7],
 				}
-			ultimo_cambio_pass = get_ultimo_cambio_pass(usuarioExistente[1])
+			ultimo_cambio_pass = get_ultimo_cambio_pass(usuarioExistente[3])
 			# Comprobar que la contraseña es correcta
 			if not verificarPassword(password, usuarioExistente):
 				return {'message' : 'Contraseña incorrecta'}, 401

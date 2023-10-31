@@ -268,3 +268,15 @@ def checkUsuarioPorDni(dni):
     
 def verificarPassword(password, usuarioExistente):
     return len(usuarioExistente) > 5 and password == usuarioExistente[5]
+
+
+def get_ultimo_cambio_pass(dni): 
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute("""SELECT fecha_ultima_password FROM public."usuario" WHERE dni=%s;""", (dni,)) 
+        result = cursor.fetchone()
+        cursor.close() 
+
+    if result is not None:
+        return result[0] 
+    return None
