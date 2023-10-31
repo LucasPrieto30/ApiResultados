@@ -79,6 +79,9 @@ login_model_response = api.model('Usuario', {
     'establecimiento_id': fields.String(description='establecimiento_id del usuario'),
 })
 
+verificar_codigo_model =  parser = reqparse.RequestParser()
+parser.add_argument('codigo', type=str, required=True, help='Código OTP de 6 dígitos')
+
 feedback_cerebro_args = reqparse.RequestParser()
 feedback_cerebro_args.add_argument('imagen_id', type=int, required=True, help='Imagen id')
 feedback_cerebro_args.add_argument('glioma', type=bool, required=False, help='glioma')

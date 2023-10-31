@@ -1,5 +1,7 @@
+import base64
 from flask_restx import Resource, Namespace, fields
-from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico, login_model, login_model_response
+import pyotp
+from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico, login_model, login_model_response, verificar_codigo_model
 from flask import jsonify, request
 from database.db import get_connection
 from werkzeug.utils import secure_filename
@@ -9,10 +11,21 @@ from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico , validar_contrasena
 from flask_restx import Api
-from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword
+from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass
 import argparse
 import datetime
 import re
+from .correo import enviar_codigo_correo
+
+SECRET_KEY = 'dtcp23'
+# Convertir la clave secreta a bytes
+secret_bytes = SECRET_KEY.encode('utf-8')
+
+# Codificar en base32
+secret_base32 = base64.b32encode(secret_bytes).decode('utf-8')
+# Crear una instancia del generador de OTP
+otp_generator = pyotp.TOTP(secret_base32, interval=60)
+
 api = Api()
 
 ns_usuarios = Namespace("Usuarios")
@@ -305,11 +318,7 @@ class Login(Resource):
 			# Verificar si el usuario tiene una contraseña valida (no expirada)
 			# if not validPassword(usuarioExistente[1]):
 			# 	return {'message' : 'La contraseña ha expirado'}, 403
-			# Comprobar que la contraseña es correcta
-			if not verificarPassword(password, usuarioExistente):
-				return {'message' : 'Contraseña incorrecta'}, 401
-			else:
-				usuario = {
+			usuario = {
 					'id': usuarioExistente[0],
 					'nombre': usuarioExistente[1],
 					'rol_id': usuarioExistente[2],
@@ -318,5 +327,31 @@ class Login(Resource):
 					'especialidad': usuarioExistente[6],
 					'establecimiento_id': usuarioExistente[7],
 				}
-				return usuario, 200
+			ultimo_cambio_pass = get_ultimo_cambio_pass(usuarioExistente[1])
+			# Comprobar que la contraseña es correcta
+			if not verificarPassword(password, usuarioExistente):
+				return {'message' : 'Contraseña incorrecta'}, 401
+			elif ultimo_cambio_pass is not None: 
+				cant_dias = (datetime.datetime.now() - ultimo_cambio_pass).days 
+				if cant_dias>= 60: 
+					return {"message": "Es necesario cambiar la contraseña."} 
+			#si el usuario es auditor o admin, se le envia un codigo de verificacion por mail
+				elif usuarioExistente[2] == 1 or usuarioExistente[2] == 2:
+					codigo_otp = otp_generator.now()
+					enviar_codigo_correo(usuarioExistente[4], codigo_otp)
+					return {'message': 'Se requiere doble verificación'}, 200
+			return usuario, 200
 		return {'message' : 'Usuario inexistente'}, 404
+	
+@ns_usuarios.route('/verificacion')
+class VerificarCodigo(Resource):
+	@ns_usuarios.doc(responses={200: 'Código válido', 401: 'Código inválido'})
+	@ns_usuarios.expect(verificar_codigo_model)
+	def post(self):
+		args = verificar_codigo_model.parse_args()
+        # Verificar el código OTp
+		if otp_generator.verify(args['codigo'], valid_window=1):
+			return {'mensaje': 'Código válido.'}, 200
+		else:
+			return {'mensaje': 'Código inválido.'}, 401
+
