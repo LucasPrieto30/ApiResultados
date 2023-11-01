@@ -19,7 +19,7 @@ def insert_medico(nuevo_medico):
         """
         correo_cifrado = fernet.encrypt(nuevo_medico.get("email").encode())  # Cifra solo el campo "email"
 
-        cursor.execute(insert_query, (
+        cursor.execute(select_query, (
             nuevo_medico.get("nombre"),
             nuevo_medico.get("dni"),
             correo_cifrado,

@@ -16,6 +16,7 @@ import argparse
 import datetime
 import re
 from .correo import enviar_codigo_correo
+from app.jwt_config import require_auth, generate_token
 
 SECRET_KEY = 'dtcp23'
 # Convertir la clave secreta a bytes
@@ -61,7 +62,8 @@ crud2 = CrudMedico()
 @ns_usuarios.route('/medicos')
 @ns_usuarios.doc(responses={200: 'Éxito', 500: 'Error interno del servidor'})
 class Medicos(Resource):
-    def get(self):
+    @require_auth
+    def get(self,payload):
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
@@ -303,17 +305,39 @@ class UpdateUserInfo(Resource):
 		except Exception as ex:
 			return {"message": str(ex)}, 500
 
-@ns_usuarios.response(200, 'Correcto. Bienvenido', login_model_response)
-@ns_usuarios.response(401, 'Contraseña incorrecta')
-@ns_usuarios.response(404, 'Usuario inexistente')
+
+login_model_response = ns_usuarios.model('LoginResponse', {
+    'token': fields.String(description='Token de acceso'),
+    'id': fields.Integer(description='ID del usuario'),
+    'nombre': fields.String(description='Nombre del usuario'),
+    'rol_id': fields.Integer(description='ID del rol del usuario'),
+    'dni': fields.String(description='DNI del usuario'),
+    'email': fields.String(description='Email del usuario'),
+    'especialidad': fields.String(description='Especialidad del usuario'),
+    'establecimiento_id': fields.Integer(description='ID del establecimiento del usuario'),
+})
+
+# Define el modelo para las solicitudes del recurso Login
+login_model = ns_usuarios.model('LoginModel', {
+    'dni': fields.String(required=True, description='DNI del usuario'),
+    'password': fields.String(required=True, description='Contraseña'),
+})
+#@ns_usuarios.response(200, 'Correcto. Bienvenido', login_model_response)
+#@ns_usuarios.response(401, 'Contraseña incorrecta')
+#@ns_usuarios.response(404, 'Usuario inexistente')
 @ns_usuarios.route('/login')
 class Login(Resource):
+	@ns_usuarios.response(200, 'Correcto. Bienvenido', login_model_response)
+	@ns_usuarios.response(401, 'Contraseña incorrecta')
+	@ns_usuarios.response(404, 'Usuario inexistente')
 	@ns_usuarios.expect(login_model, validate=True)
 	def post(self):
 		args = ns_usuarios.payload
 		dni = args['dni']
 		password = args['password']
 		usuarioExistente = checkUsuarioPorDni(dni)
+		if not dni or not password:
+			return {'message': 'Por favor, ingrese DNI y contraseña'}, 400
 		if usuarioExistente:
 			# Verificar si el usuario tiene una contraseña valida (no expirada)
 			# if not validPassword(usuarioExistente[1]):
@@ -340,9 +364,22 @@ class Login(Resource):
 					codigo_otp = otp_generator.now()
 					enviar_codigo_correo(usuarioExistente[4], codigo_otp)
 					return {'message': 'Se requiere doble verificación'}, 200
-			return usuario, 200
+			token = generate_token(usuario)
+				
+				# Incluir el token en la respuesta
+			usuario_data = {
+				'token': token,
+				'id': usuarioExistente[0],
+				'nombre': usuarioExistente[1],
+				'rol_id': usuarioExistente[2],
+				'dni': usuarioExistente[3],
+				'email': usuarioExistente[4],
+				'especialidad': usuarioExistente[6],
+				'establecimiento_id': usuarioExistente[7],
+			}
+			return usuario_data, 200
 		return {'message' : 'Usuario inexistente'}, 404
-	
+
 @ns_usuarios.route('/verificacion')
 class VerificarCodigo(Resource):
 	@ns_usuarios.doc(responses={200: 'Código válido', 401: 'Código inválido'})

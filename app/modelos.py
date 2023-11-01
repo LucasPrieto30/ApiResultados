@@ -66,7 +66,7 @@ post_medico = api.model("PostMedico", {
 
 login_model = api.model('Login', {
     'dni': fields.String(required=True, description='DNI del usuario'),
-    'password': fields.String(required=True, description='Contraseña del usuario'),
+    'password': fields.String(required=True, description='Contraseña del usuario')
 })
 
 login_model_response = api.model('Usuario', {
@@ -77,6 +77,8 @@ login_model_response = api.model('Usuario', {
     'email': fields.String(description='Correo electrónico del usuario'),
     'especialidad': fields.String(description='Especialidad del usuario'),
     'establecimiento_id': fields.String(description='establecimiento_id del usuario'),
+    'token': fields.String(description='Token de acceso')
+
 })
 
 verificar_codigo_model =  parser = reqparse.RequestParser()

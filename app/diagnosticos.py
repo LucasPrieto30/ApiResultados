@@ -12,6 +12,7 @@ from psycopg2 import Binary
 import requests
 #random para prediccion res
 import random
+from app.jwt_config import require_auth
 
 ns = Namespace("Pruebas")
 ns2 = Namespace("Diagnosticos")
@@ -293,8 +294,9 @@ from PIL import Image
 
 @ns.route('/imagen/<int:diagnostico_id>')
 class Imagen(Resource):
+    @require_auth
     @ns.doc(responses={200: 'Éxito', 500: 'Error interno del servidor', 404: 'Imagen no encontrada'})
-    def get(self, diagnostico_id):
+    def get(self,payload, diagnostico_id):
         # Realizar una conexión a la base de datos
         connection = get_connection()
         cursor = connection.cursor()
