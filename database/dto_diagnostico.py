@@ -12,8 +12,8 @@ def insert_diagnostico(datos_diagnostico):
             medicoExiste = cursor.fetchone()
             
             insert_query = """
-            INSERT INTO public.diagnostico(imagen_id, datos_complementarios, fecha, resultado, usuario_id, modelo_id, usuario_medico_dni, usuario_medico_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO public.diagnostico(imagen_id, datos_complementarios, fecha, resultado, usuario_id, modelo_id, usuario_medico_dni, usuario_medico_id, datos_paciente)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             """
             values = (
                 datos_diagnostico.get("imagen_id"),
@@ -24,10 +24,13 @@ def insert_diagnostico(datos_diagnostico):
                 datos_diagnostico.get("id_modelo"),
                 datos_diagnostico.get("dni_medico"),
                 medicoExiste[0] if medicoExiste else None,
+                datos_diagnostico.get("datos_paciente")
             )
             cursor.execute("INSERT INTO public.imagen_analisis (imagen_id, imagen) VALUES (%s, %s);", (datos_diagnostico.get("imagen_id"), datos_diagnostico.get("imagen")))
             cursor.execute(insert_query, values)
+            new_diagnostico_id = cursor.fetchone()[0]
             connection.commit()
+            return new_diagnostico_id
     except Exception as e:
         connection.rollback()
         return {'error': str(e)}
@@ -38,7 +41,7 @@ def obtener_diagnostico(id_diagnostico, rol):
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
-            cursor.execute(f'SELECT d.id, d.imagen_id, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico, i.imagen as imagen FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.imagen_analisis as i ON d.imagen_id = i.imagen_id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni WHERE d.id=%s;', (id_diagnostico,))
+            cursor.execute(f'SELECT d.id, d.imagen_id, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico, i.imagen as imagen, d.datos_paciente FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.imagen_analisis as i ON d.imagen_id = i.imagen_id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni WHERE d.id=%s;', (id_diagnostico,))
             
             row = cursor.fetchone()
             if(row is None):
@@ -60,6 +63,7 @@ def obtener_diagnostico(id_diagnostico, rol):
                     "modelo_nombre": row[9],
                     "nombre_medico": row[10],
                     "imagen": imagen_base64,
+                    "datos_paciente": row[12]
                 }
                 if int(rol) == 4 or int(rol) == 1:
                     diagnostico["resultado"] = row[4]

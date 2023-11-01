@@ -363,7 +363,7 @@ class Login(Resource):
 				elif usuarioExistente[2] == 1 or usuarioExistente[2] == 2:
 					codigo_otp = otp_generator.now()
 					enviar_codigo_correo(usuarioExistente[4], codigo_otp)
-					return {'message': 'Se requiere doble verificación'}, 200
+					#return {'message': 'Se requiere doble verificación'}, 200
 			token = generate_token(usuario)
 				
 				# Incluir el token en la respuesta

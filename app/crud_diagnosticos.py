@@ -36,6 +36,14 @@ class CrudDiagnostico:
             elif(datos_diagnostico['modelo_id'] == 3):
                 datos_complementarios = {}
 
+            datos_paciente = {
+                'fecha_nacimiento': datos_diagnostico['fecha_nacimiento'],
+                'peso': datos_diagnostico['peso'],
+                'altura': datos_diagnostico['altura'],
+                'sexo': datos_diagnostico['sexo'],
+            }
+
+            datos_paciente_json = json.dumps(datos_paciente)
             # Convertir el diccionario a formato JSON
             datos_complementarios_json = json.dumps(datos_complementarios)
             # Define la zona horaria de Argentina
@@ -54,9 +62,11 @@ class CrudDiagnostico:
                 "resultado": json.dumps(data), 
                 "usuario_id":  datos_diagnostico['id_usuario'], 
                 "dni_medico": datos_diagnostico['dni_medico'],
-                "id_modelo": datos_diagnostico['modelo_id']  
+                "id_modelo": datos_diagnostico['modelo_id'],
+                "datos_paciente": datos_paciente_json
             }
-            insert_diagnostico(nuevo_diagnostico)
+            id_diagnostico = insert_diagnostico(nuevo_diagnostico)
+            return id_diagnostico
         except Exception as ex:
                 return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
         

@@ -43,7 +43,7 @@ class HistorialResource(Resource):
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                query_sql = 'SELECT d.id, d.imagen_id, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico, i.imagen as imagen FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.imagen_analisis as i ON d.imagen_id = i.imagen_id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni'
+                query_sql = 'SELECT d.id, d.imagen_id, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico, i.imagen as imagen, d.datos_paciente FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.imagen_analisis as i ON d.imagen_id = i.imagen_id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni'
 
                 if verificar_Usuario_rol_medico(rol_id):
                     cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
@@ -72,7 +72,8 @@ class HistorialResource(Resource):
                     "nombre_usuario": diagnostico[8],
                     "modelo_nombre": diagnostico[9],
                     "nombre_medico": diagnostico[10],
-                    "imagen": base64.b64encode(base64.b64decode(diagnostico[11])).decode('utf-8')
+                    "imagen": base64.b64encode(base64.b64decode(diagnostico[11])).decode('utf-8'),
+                    "datos_paciente": diagnostico[12]
                 }
 
                 # Verificar el rol y agregar o excluir la columna "resultado"
@@ -142,7 +143,8 @@ class PruebaImagen(Resource):
                 # Si la respuesta es JSON, puedes cargarla como un diccionario
                 data = response.json()
                 # guarda el diagnostico cuando se obtiene el response
-                crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                data["id"] = id_diagnostico
                 return data, 200
             else:
                 return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
@@ -202,7 +204,8 @@ class PruebaImagen(Resource):
                 # Si la respuesta es JSON, puedes cargarla como un diccionario
                 data = response.json()
                 # guarda el diagnostico cuando se obtiene el response
-                crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                data["id"] = id_diagnostico
                 return data, 200
             else:
                 return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
@@ -244,7 +247,8 @@ class PruebaImagen(Resource):
             if response.status_code == 200:
                 data = response.json()
                 # guarda el diagnostico cuando se obtiene el response
-                crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                data["id"] = id_diagnostico
                 return data, 200
             else:
                 return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500

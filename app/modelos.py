@@ -32,6 +32,10 @@ diag_parser_cerebro.add_argument('debilidad_focal', type=bool, required=True, he
 diag_parser_cerebro.add_argument('convulsiones', type=bool, required=True, help='Convulsiones')
 diag_parser_cerebro.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
 diag_parser_cerebro.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
+diag_parser_cerebro.add_argument('fecha_nacimiento', type=str, required=True, help='Fecha de nacimiento del paciente')
+diag_parser_cerebro.add_argument('peso', type=int, required=True, help='Peso del pacietnte en KG')
+diag_parser_cerebro.add_argument('altura', type=int, required=True, help='Altura del paciente en CM')
+diag_parser_cerebro.add_argument('sexo', type=str, required=True, help='Sexo del paciente')
 
 # parametros para diagnostico del modelo: pulmones
 diag_parser_pulmones = reqparse.RequestParser()
@@ -41,6 +45,10 @@ diag_parser_pulmones.add_argument('fiebre', type=bool, required=True, help='fieb
 diag_parser_pulmones.add_argument('dificultad_respiratoria', type=bool, required=True, help='dificultad_respiratoria')
 diag_parser_pulmones.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
 diag_parser_pulmones.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
+diag_parser_pulmones.add_argument('fecha_nacimiento', type=str, required=True, help='Fecha de nacimiento del paciente')
+diag_parser_pulmones.add_argument('peso', type=int, required=True, help='Peso del pacietnte en KG')
+diag_parser_pulmones.add_argument('altura', type=int, required=True, help='Altura del paciente en CM')
+diag_parser_pulmones.add_argument('sexo', type=str, required=True, help='Sexo del paciente')
 
 
 # parametros para diagnostico del modelo: corazon
@@ -48,6 +56,10 @@ diag_parser_corazon = reqparse.RequestParser()
 diag_parser_corazon.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
 diag_parser_corazon.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
 diag_parser_corazon.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
+diag_parser_corazon.add_argument('fecha_nacimiento', type=str, required=True, help='Fecha de nacimiento del paciente')
+diag_parser_corazon.add_argument('peso', type=int, required=True, help='Peso del pacietnte en KG')
+diag_parser_corazon.add_argument('altura', type=int, required=True, help='Altura del paciente en CM')
+diag_parser_corazon.add_argument('sexo', type=str, required=True, help='Sexo del paciente')
 
 from datetime import datetime
 
