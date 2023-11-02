@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields, api, reqparse
 import psycopg2
-from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_riñones_args, feedback_corazon_args, feedback_pulmones_args, feedback_rodilla_args, diag_parser_riñones,diag_parser_rodilla
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_riñones_args, feedback_corazon_args, feedback_pulmones_args, feedback_rodilla_args, diag_parser_riñones,diag_parser_rodilla, feedback_muñeca_args
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from database.db import get_connection
@@ -622,6 +622,28 @@ class FeedbackRodilla(Resource):
         print(feedback)
         try:
             url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&rotura_lca={feedback["rotura_lca"]}&lca_sano={feedback["lca_sano"]}'
+            if (request.values.get('comentario') is not None):
+                url += "&comentario="+request.values.get('comentario')
+            print(url)
+            response = requests.post(url)
+            # Procesar la respuesta
+            if response.status_code == 200:
+                return {"message": "Feedback enviado correctamente"}, 200
+            elif response.status_code == 404:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+        except Exception as ex:
+           return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
+        
+@feedbackNs.route('/muñeca')
+class FeedbackMuñeca(Resource):
+    @feedbackNs.expect(feedback_muñeca_args)
+    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    def post(self):
+        feedback = feedback_muñeca_args.parse_args()
+        feedback["imagen_id"] = request.values.get('imagen_id')
+        print(feedback)
+        try:
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&etiqueta1=algo'
             if (request.values.get('comentario') is not None):
                 url += "&comentario="+request.values.get('comentario')
             print(url)

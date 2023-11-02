@@ -53,6 +53,11 @@ diag_parser_pulmones.add_argument('sexo', type=str, required=True, help='Sexo de
 # parametros para diagnostico del modelo: corazon
 diag_parser_corazon = reqparse.RequestParser()
 diag_parser_corazon.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
+
+diag_parser_corazon.add_argument('palpitaciones', type=bool, required=False, help='palpitaciones')
+diag_parser_corazon.add_argument('dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo', type=bool, required=False, help='Dolor torácico o irradiado a cuello, mandíbula y miembro superior izquierdo')
+diag_parser_corazon.add_argument('disnea', type=bool, required=False, help='Disnea')
+
 diag_parser_corazon.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
 diag_parser_corazon.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
 diag_parser_corazon.add_argument('fecha_nacimiento', type=str, required=True, help='Fecha de nacimiento del paciente')
@@ -161,3 +166,9 @@ feedback_rodilla_args.add_argument('imagen_id', type=int, required=True, help='I
 feedback_rodilla_args.add_argument('rotura_lca', type=bool, required=False, help='rotura_lca')
 feedback_rodilla_args.add_argument('lca_sano', type=bool, required=False, help='lca_sano')
 feedback_rodilla_args.add_argument('comentario', type=str, required=False, help='Comentario del médico')
+
+feedback_muñeca_args = reqparse.RequestParser()
+feedback_muñeca_args.add_argument('imagen_id', type=int, required=True, help='Imagen id')
+feedback_muñeca_args.add_argument('etiqueta 1', type=bool, required=False, help='etiqueta 1')
+feedback_muñeca_args.add_argument('etiqueta 2', type=bool, required=False, help='etiqueta 2')
+feedback_muñeca_args.add_argument('comentario', type=str, required=False, help='Comentario del médico')
