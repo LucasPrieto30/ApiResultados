@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields, api, reqparse
 import psycopg2
-from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_pulmones_args
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_pulmones_args, diag_parser_riñones
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from database.db import get_connection
@@ -255,6 +255,72 @@ class PruebaImagen(Resource):
         except Exception as ex:
             return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
 
+@ns2.route('/predecir/riñones')
+class PruebaImagen(Resource):
+    @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
+    @ns2.expect(diag_parser_riñones)
+    def post(self):
+        nuevo_diagnostico = diag_parser_riñones.parse_args()
+        nuevo_diagnostico["hermaturia"] = request.values.get('hermaturia').lower() == 'true' 
+        nuevo_diagnostico["dolor_lumbar"] = request.values.get('dolor_lumbar').lower() == 'true' 
+        nuevo_diagnostico["dolor_abdominal"] = request.values.get('dolor_abdominal').lower() == 'true' 
+        nuevo_diagnostico["fiebre"] = request.values.get('fiebre').lower() == 'true' 
+        nuevo_diagnostico["perdida_peso"] = request.values.get('perdida_peso').lower() == 'true' 
+        nuevo_diagnostico["modelo_id"] = 4
+        img = request.files['imagen']
+       
+        filename = ""
+        if img and allowed_file(img.filename):
+            filename = secure_filename(img.filename)
+            img.save(os.path.join('app/static', filename))
+        else:
+            return {'msg': 'Solo se permiten cargar archivos jpg y jpeg'}
+
+        datos = {
+            'hermaturia':nuevo_diagnostico['hermaturia'],
+            'dolor_lumbar':nuevo_diagnostico['dolor_lumbar'],
+            'dolor_abdominal':nuevo_diagnostico['dolor_abdominal'],
+            'fiebre':nuevo_diagnostico['fiebre'],
+            'perdida_peso': nuevo_diagnostico['perdida_peso']
+        }
+
+        try:
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
+                siguiente_imagen_id = cursor.fetchone()[0]
+                if (siguiente_imagen_id is None):
+                    siguiente_imagen_id = 1
+                nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
+                cursor.close()
+                connection.close()
+    
+            # URL de la API externa a la que deseas enviar la imagen
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/lyso?hermaturia={datos["hermaturia"]}&dolor_lumbar={datos["dolor_lumbar"]}&dolor_abdominal={datos["dolor_abdominal"]}&fiebre={datos["fiebre"]}&perdida_peso={datos["perdida_peso"]}&id_image={siguiente_imagen_id}'
+            
+            # Leer la imagen en formato binario
+            with open(os.path.join('app/static', filename), 'rb') as file:
+                image_data = file.read()
+            
+            # falta agregar datos complementarios a la request
+            files = {'image': (filename, image_data, 'image/jpeg')}
+
+            # Realizar la solicitud POST con los datos y la imagen
+            response = requests.post(url, files=files) # data= datos
+            
+            # Procesar la respuesta
+            if response.status_code == 200:
+                # Si la respuesta es JSON, puedes cargarla como un diccionario
+                data = response.json()
+                # guarda el diagnostico cuando se obtiene el response
+                id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                data["id"] = id_diagnostico
+                return data, 200
+            else:
+                return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
+        except Exception as ex:
+            return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
+        
 @ns2.route("/<int:id_diagnostico>")
 class DiagnosticoResource(Resource):
     @ns2.expect(parser)

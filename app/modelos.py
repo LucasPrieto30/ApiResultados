@@ -61,6 +61,21 @@ diag_parser_corazon.add_argument('peso', type=int, required=True, help='Peso del
 diag_parser_corazon.add_argument('altura', type=int, required=True, help='Altura del paciente en CM')
 diag_parser_corazon.add_argument('sexo', type=str, required=True, help='Sexo del paciente')
 
+# parametros para diagnostico del modelo: riñones
+diag_parser_riñones = reqparse.RequestParser()
+diag_parser_riñones.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
+diag_parser_riñones.add_argument('hermaturia', type=bool, required=True, help='hematuria')
+diag_parser_riñones.add_argument('dolor_lumbar', type=bool, required=True, help='dolor_lumbar')
+diag_parser_riñones.add_argument('dolor_abdominal', type=bool, required=True, help='dolor_abdominal')
+diag_parser_riñones.add_argument('fiebre', type=bool, required=True, help='fiebre')
+diag_parser_riñones.add_argument('perdida_peso', type=bool, required=True, help='perdida_peso')
+diag_parser_riñones.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
+diag_parser_riñones.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
+diag_parser_riñones.add_argument('fecha_nacimiento', type=str, required=True, help='Fecha de nacimiento del paciente')
+diag_parser_riñones.add_argument('peso', type=int, required=True, help='Peso del pacietnte en KG')
+diag_parser_riñones.add_argument('altura', type=int, required=True, help='Altura del paciente en CM')
+diag_parser_riñones.add_argument('sexo', type=str, required=True, help='Sexo del paciente')
+
 from datetime import datetime
 
 post_medico = api.model("PostMedico", {

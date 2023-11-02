@@ -35,6 +35,14 @@ class CrudDiagnostico:
                 }
             elif(datos_diagnostico['modelo_id'] == 3):
                 datos_complementarios = {}
+            elif(datos_diagnostico['modelo_id'] == 4):
+                datos_complementarios = {
+                    'hermaturia': datos_diagnostico['hermaturia'],
+                    'dolor_lumbar':datos_diagnostico['dolor_lumbar'],
+                    'dolor_abdominal':datos_diagnostico['dolor_abdominal'],
+                    'fiebre':datos_diagnostico['fiebre'],
+                    'perdida_peso': datos_diagnostico['perdida_peso']
+                }
 
             datos_paciente = {
                 'fecha_nacimiento': datos_diagnostico['fecha_nacimiento'],
@@ -54,7 +62,7 @@ class CrudDiagnostico:
             # Obtener la fecha actual
             fecha_actual = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
             # crear un diagnóstico con los datos
-            nuevo_diagnostico = {
+            datos_diagnostico = {
                 "imagen": img_encoded,
                 "imagen_id": datos_diagnostico['imagen_id'],
                 "datos_complementarios": datos_complementarios_json,
@@ -65,7 +73,8 @@ class CrudDiagnostico:
                 "id_modelo": datos_diagnostico['modelo_id'],
                 "datos_paciente": datos_paciente_json
             }
-            id_diagnostico = insert_diagnostico(nuevo_diagnostico)
+            
+            id_diagnostico = insert_diagnostico(datos_diagnostico)
             return id_diagnostico
         except Exception as ex:
                 return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
