@@ -2,15 +2,18 @@
 import base64
 from database.db import get_connection
 from psycopg2.extras import RealDictCursor
-
+from database.dto_medico import obtener_clave_desde_Medico
 # insertar diagnostico de modelo: cerebro
 def insert_diagnostico(datos_diagnostico):
+    clave_maestra=obtener_clave_desde_Medico()
     try:
         connection = get_connection()
+        clave_maestra=obtener_clave_desde_Medico()
         with connection.cursor() as cursor:
             cursor.execute("SELECT id FROM usuario WHERE dni = %s", (datos_diagnostico.get("dni_medico"),))
             medicoExiste = cursor.fetchone()
-            
+            cursor.execute("SELECT pgp_sym_encrypt(%s, %s, 'compress-algo=0,cipher-algo=AES128');", (datos_diagnostico.get("datos_paciente"), clave_maestra))
+            datos_paciente_encriptado = cursor.fetchone()[0]
             insert_query = """
             INSERT INTO public.diagnostico(imagen_id, datos_complementarios, fecha, resultado, usuario_id, modelo_id, usuario_medico_dni, usuario_medico_id, datos_paciente)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
@@ -24,7 +27,7 @@ def insert_diagnostico(datos_diagnostico):
                 datos_diagnostico.get("id_modelo"),
                 datos_diagnostico.get("dni_medico"),
                 medicoExiste[0] if medicoExiste else None,
-                datos_diagnostico.get("datos_paciente")
+                datos_paciente_encriptado
             )
             cursor.execute("INSERT INTO public.imagen_analisis (imagen_id, imagen) VALUES (%s, %s);", (datos_diagnostico.get("imagen_id"), datos_diagnostico.get("imagen")))
             cursor.execute(insert_query, values)
@@ -37,7 +40,7 @@ def insert_diagnostico(datos_diagnostico):
 
 def obtener_diagnostico(id_diagnostico, rol):
     diagnostico = None
-
+    clave_maestra = obtener_clave_desde_Medico()
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
@@ -62,12 +65,16 @@ def obtener_diagnostico(id_diagnostico, rol):
                     "nombre_usuario": row[8],
                     "modelo_nombre": row[9],
                     "nombre_medico": row[10],
-                    "imagen": imagen_base64,
-                    "datos_paciente": row[12]
+                    "imagen": imagen_base64
+                    #"datos_paciente": row[12]
                 }
                 if int(rol) == 4 or int(rol) == 1:
                     diagnostico["resultado"] = row[4]
-
+                # Verificar y descifrar datos_paciente si está cifrado
+                if row[12] is not None and row[12].startswith('\\x'):
+                    cursor.execute(f"SELECT pgp_sym_decrypt('{row[12]}'::bytea, %s, 'compress-algo=0,cipher-algo=AES128');", (clave_maestra,))
+                    datos_paciente_descifrado = cursor.fetchone()[0]
+                    diagnostico["datos_paciente"] = datos_paciente_descifrado
             connection.close()
             connection.close()
         if diagnostico:

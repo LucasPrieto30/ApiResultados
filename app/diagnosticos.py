@@ -14,7 +14,7 @@ import requests
 import random
 from app.jwt_config import require_auth
 import json
-
+from database.dto_medico import obtener_clave_desde_Medico
 ns = Namespace("Pruebas")
 ns2 = Namespace("Diagnosticos")
 feedbackNs = Namespace("Feedback")
@@ -30,6 +30,27 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 # está en el conjunto de extensiones permitidas y false en caso contrario.
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def desencriptar_campo(campo, clave_maestra):
+    if campo:
+        # Comprueba si el campo es una cadena cifrada (generalmente una cadena base64)
+        if isinstance(campo, str):
+            # Intenta desencriptar el campo
+            try:
+                connection = get_connection()
+                with connection.cursor() as cursor:
+                    cursor.execute(f"SELECT pgp_sym_decrypt('{campo}'::bytea, %s, 'compress-algo=0,cipher-algo=AES128');", (clave_maestra,))
+                    resultado = cursor.fetchone()
+                connection.close()
+                return resultado[0]
+            except Exception as e:
+                # No se pudo desencriptar el campo, así que se devuelve tal como está
+                return campo
+        else:
+            # El campo no es una cadena cifrada, así que se devuelve tal como está
+            return campo
+    else:
+        # El campo es None, se devuelve None
+        return None
 
 @ns2.route('/historial')
 class HistorialResource(Resource):
@@ -40,7 +61,7 @@ class HistorialResource(Resource):
 
         id_usuario = args['id_usuario']
         rol_id = args['rol_id']
-
+        clave_maestra=obtener_clave_desde_Medico()
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
@@ -74,9 +95,8 @@ class HistorialResource(Resource):
                     "modelo_nombre": diagnostico[9],
                     "nombre_medico": diagnostico[10],
                     "imagen": base64.b64encode(base64.b64decode(diagnostico[11])).decode('utf-8'),
-                    "datos_paciente": diagnostico[12]
+                    "datos_paciente": desencriptar_campo(diagnostico[12], clave_maestra)
                 }
-
                 # Verificar el rol y agregar o excluir la columna "resultado"
                 if rol_id == 4 or rol_id == 1:
                     diagnostico_dict["resultado"] = diagnostico[4]
@@ -86,6 +106,7 @@ class HistorialResource(Resource):
             return {"historial": historial_formateado}
 
         except psycopg2.Error as e:
+            #raise e
             return {"error": "Error al acceder a la base de datos"}, 500
         finally:
             connection.close()
