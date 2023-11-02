@@ -421,6 +421,9 @@ class PruebaImagen(Resource):
     @ns2.expect(diag_parser_muñeca)
     def post(self):
         nuevo_diagnostico = diag_parser_muñeca.parse_args()
+        nuevo_diagnostico["limitacion_funcional"] = request.values.get('limitacion_funcional').lower() == 'true' 
+        nuevo_diagnostico["edema"] = request.values.get('edema').lower() == 'true' 
+        nuevo_diagnostico["deformidad"] = request.values.get('deformidad').lower() == 'true' 
         nuevo_diagnostico["modelo_id"] = 6             
         img = request.files['imagen']
        
