@@ -50,7 +50,6 @@ diag_parser_pulmones.add_argument('peso', type=int, required=True, help='Peso de
 diag_parser_pulmones.add_argument('altura', type=int, required=True, help='Altura del paciente en CM')
 diag_parser_pulmones.add_argument('sexo', type=str, required=True, help='Sexo del paciente')
 
-
 # parametros para diagnostico del modelo: corazon
 diag_parser_corazon = reqparse.RequestParser()
 diag_parser_corazon.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
@@ -75,6 +74,20 @@ diag_parser_riñones.add_argument('fecha_nacimiento', type=str, required=True, h
 diag_parser_riñones.add_argument('peso', type=int, required=True, help='Peso del pacietnte en KG')
 diag_parser_riñones.add_argument('altura', type=int, required=True, help='Altura del paciente en CM')
 diag_parser_riñones.add_argument('sexo', type=str, required=True, help='Sexo del paciente')
+
+# parametros para diagnostico del modelo: rodilla
+diag_parser_rodilla = reqparse.RequestParser()
+diag_parser_rodilla.add_argument('archivo', type=FileStorage, location='files', required=True, help='Archivo zip')
+diag_parser_rodilla.add_argument('sensacion_inestabilidad', type=bool, required=True, help='Sensacion de inestabilidad')
+diag_parser_rodilla.add_argument('CA_positiva', type=bool, required=True, help='Prueba del "Cajon anterior" positiva')
+diag_parser_rodilla.add_argument('impotencia_funcional', type=bool, required=True, help='Impotencia funcional')
+diag_parser_rodilla.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
+diag_parser_rodilla.add_argument('dni_medico', type=str, required=True, help='DNI de médico')
+diag_parser_rodilla.add_argument('fecha_nacimiento', type=str, required=True, help='Fecha de nacimiento del paciente')
+diag_parser_rodilla.add_argument('peso', type=int, required=True, help='Peso del pacietnte en KG')
+diag_parser_rodilla.add_argument('altura', type=int, required=True, help='Altura del paciente en CM')
+diag_parser_rodilla.add_argument('sexo', type=str, required=True, help='Sexo del paciente')
+
 
 from datetime import datetime
 

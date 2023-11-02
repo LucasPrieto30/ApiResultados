@@ -18,9 +18,12 @@ class CrudDiagnostico:
     # diagnostico modelo de cerebro
     def crear_diagnostico(self, datos_diagnostico, data, img_data):
         try:
-            img_encoded = base64.b64encode(img_data).decode('utf-8')
+            if(datos_diagnostico['modelo_id'] == 5):
+                img_encoded = img_data
+            else:
+                img_encoded = base64.b64encode(img_data).decode('utf-8')
             datos_complementarios = {}
-
+          
             if(datos_diagnostico['modelo_id'] == 1):
                 datos_complementarios = {
                     'perdida_visual': datos_diagnostico['perdida_visual'],
@@ -42,6 +45,12 @@ class CrudDiagnostico:
                     'dolor_abdominal':datos_diagnostico['dolor_abdominal'],
                     'fiebre':datos_diagnostico['fiebre'],
                     'perdida_peso': datos_diagnostico['perdida_peso']
+                }
+            elif(datos_diagnostico['modelo_id'] == 5):
+                datos_complementarios = {
+                    'sensacion_de_inestabilidad':datos_diagnostico['sensacion_inestabilidad'],
+                    'prueba_CA_positiva':datos_diagnostico['CA_positiva'],
+                    'impotencia_funcional':datos_diagnostico['impotencia_funcional']
                 }
 
             datos_paciente = {
