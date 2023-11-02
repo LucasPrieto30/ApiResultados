@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields, api, reqparse
 import psycopg2
-from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_pulmones_args, diag_parser_riñones
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_riñones_args, feedback_corazon_args, feedback_pulmones_args, feedback_rodilla_args, diag_parser_riñones
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from database.db import get_connection
@@ -13,6 +13,7 @@ import requests
 #random para prediccion res
 import random
 from app.jwt_config import require_auth
+import json
 
 ns = Namespace("Pruebas")
 ns2 = Namespace("Diagnosticos")
@@ -145,6 +146,7 @@ class PruebaImagen(Resource):
                 # guarda el diagnostico cuando se obtiene el response
                 id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
                 data["id"] = id_diagnostico
+                data["imagen_id"] = nuevo_diagnostico["imagen_id"]
                 return data, 200
             else:
                 return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
@@ -206,6 +208,7 @@ class PruebaImagen(Resource):
                 # guarda el diagnostico cuando se obtiene el response
                 id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
                 data["id"] = id_diagnostico
+                data["imagen_id"] = nuevo_diagnostico["imagen_id"]
                 return data, 200
             else:
                 return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
@@ -235,7 +238,14 @@ class PruebaImagen(Resource):
                 siguiente_imagen_id = 1
             nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
         try:
-            url = 'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict'
+            datos_paciente = {
+                'fecha_nacimiento': nuevo_diagnostico['fecha_nacimiento'],
+                'peso': nuevo_diagnostico['peso'],
+                'altura': nuevo_diagnostico['altura'],
+                'sexo': nuevo_diagnostico['sexo'],
+            }
+            datos_paciente_json = json.dumps(datos_paciente)
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict?imagen_id={nuevo_diagnostico["imagen_id"]}&datos_paciente={datos_paciente_json}'
         
             with open(os.path.join('app/static', filename), 'rb') as file:
                 image_data = file.read()
@@ -249,6 +259,7 @@ class PruebaImagen(Resource):
                 # guarda el diagnostico cuando se obtiene el response
                 id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
                 data["id"] = id_diagnostico
+                data["imagen_id"] = nuevo_diagnostico["imagen_id"]
                 return data, 200
             else:
                 return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
@@ -315,6 +326,7 @@ class PruebaImagen(Resource):
                 # guarda el diagnostico cuando se obtiene el response
                 id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
                 data["id"] = id_diagnostico
+                data["imagen_id"] = nuevo_diagnostico["imagen_id"]
                 return data, 200
             else:
                 return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
@@ -427,6 +439,8 @@ class FeedbackCerebro(Resource):
         feedback["imagen_id"] = request.values.get('imagen_id')
         try:
             url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/feedback/fred?id_image={feedback["imagen_id"]}&glioma={feedback["glioma"]}&meningioma={feedback["meningioma"]}&pituitary={feedback["pituitary"]}&no_tumor={feedback["no_tumor"]}'
+            if (request.values.get('comentario') is not None):
+                url += "&comment="+request.values.get('comentario')
             response = requests.post(url) # data= datos
             # Procesar la respuesta
             if response.status_code == 200:
@@ -449,6 +463,86 @@ class FeedbackPulmones(Resource):
         print(feedback)
         try:
             url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/feedback/wini?id_image={feedback["imagen_id"]}&pneumonia={feedback["pneumonia"]}&no_pneumonia={feedback["no_pneumonia"]}'
+            if (request.values.get('comentario') is not None):
+                url += "&comment="+request.values.get('comentario')
+            print(url)
+            response = requests.post(url)
+            # Procesar la respuesta
+            if response.status_code == 200:
+                return {"message": "Feedback enviado correctamente"}, 200
+            elif response.status_code == 404:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+        except Exception as ex:
+           return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
+        
+@feedbackNs.route('/riñones')
+class FeedbackRiñones(Resource):
+    @feedbackNs.expect(feedback_riñones_args)
+    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    def post(self):
+        feedback = feedback_riñones_args.parse_args()
+        feedback["quiste"] = request.values.get('quiste') is not None and request.values.get('quiste').lower() == 'true' 
+        feedback["piedra"] = request.values.get('piedra') is not None and request.values.get('piedra').lower() == 'true' 
+        feedback["tumor"] = request.values.get('tumor') is not None and request.values.get('tumor').lower() == 'true' 
+        feedback["normal"] = request.values.get('normal') is not None and request.values.get('normal').lower() == 'true' 
+        feedback["imagen_id"] = request.values.get('imagen_id')
+        print(feedback)
+        try:
+            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/feedback/lyso?id_image={feedback["imagen_id"]}&quiste={feedback["quiste"]}&piedra={feedback["piedra"]}&tumor={feedback["tumor"]}&normal={feedback["normal"]}'
+            if (request.values.get('comentario') is not None):
+                url += "&comment="+request.values.get('comentario')
+            print(url)
+            response = requests.post(url)
+            # Procesar la respuesta
+            if response.status_code == 200:
+                return {"message": "Feedback enviado correctamente"}, 200
+            elif response.status_code == 404:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+        except Exception as ex:
+           return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
+        
+@feedbackNs.route('/corazon')
+class FeedbackCorazon(Resource):
+    @feedbackNs.expect(feedback_corazon_args)
+    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    def post(self):
+        feedback = feedback_corazon_args.parse_args()
+        feedback["contraccion_ventricular_prematura"] = request.values.get('contraccion_ventricular_prematura') is not None and request.values.get('contraccion_ventricular_prematura').lower() == 'true' 
+        feedback["fusion_de_latido_ventricular_y_normal"] = request.values.get('fusion_de_latido_ventricular_y_normal') is not None and request.values.get('fusion_de_latido_ventricular_y_normal').lower() == 'true' 
+        feedback["infarto_de_miocardio"] = request.values.get('infarto_de_miocardio') is not None and request.values.get('infarto_de_miocardio').lower() == 'true' 
+        feedback["latido_no_clasificable"] = request.values.get('latido_no_clasificable') is not None and request.values.get('latido_no_clasificable').lower() == 'true' 
+        feedback["latido_normal"] = request.values.get('latido_normal') is not None and request.values.get('latido_normal').lower() == 'true' 
+        feedback["latido_prematuro_supraventricular"] = request.values.get('latido_prematuro_supraventricular') is not None and request.values.get('latido_prematuro_supraventricular').lower() == 'true' 
+        feedback["imagen_id"] = request.values.get('imagen_id')
+        print(feedback)
+        try:
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&contraccion_ventricular_prematura={feedback["contraccion_ventricular_prematura"]}&fusion_de_latido_ventricular_y_normal={feedback["fusion_de_latido_ventricular_y_normal"]}&infarto_de_miocardio={feedback["infarto_de_miocardio"]}&latido_no_clasificable={feedback["latido_no_clasificable"]}&latido_normal={feedback["latido_normal"]}&latido_prematuro_supraventricular={feedback["latido_prematuro_supraventricular"]}'
+            if (request.values.get('comentario') is not None):
+                url += "&comentario="+request.values.get('comentario')
+            print(url)
+            response = requests.post(url)
+            # Procesar la respuesta
+            if response.status_code == 200:
+                return {"message": "Feedback enviado correctamente"}, 200
+            elif response.status_code == 404:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+        except Exception as ex:
+           return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
+        
+@feedbackNs.route('/rodilla')
+class FeedbackRodilla(Resource):
+    @feedbackNs.expect(feedback_rodilla_args)
+    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    def post(self):
+        feedback = feedback_rodilla_args.parse_args()
+        feedback["rotura_lca"] = request.values.get('rotura_lca') is not None and request.values.get('rotura_lca').lower() == 'true' 
+        feedback["lca_sano"] = request.values.get('lca_sano') is not None and request.values.get('lca_sano').lower() == 'true' 
+        feedback["imagen_id"] = request.values.get('imagen_id')
+        print(feedback)
+        try:
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&rotura_lca={feedback["rotura_lca"]}&lca_sano={feedback["lca_sano"]}'
+            if (request.values.get('comentario') is not None):
+                url += "&comentario="+request.values.get('comentario')
             print(url)
             response = requests.post(url)
             # Procesar la respuesta
