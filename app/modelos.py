@@ -180,6 +180,6 @@ feedback_rodilla_args.add_argument('comentario', type=str, required=False, help=
 
 feedback_muñeca_args = reqparse.RequestParser()
 feedback_muñeca_args.add_argument('imagen_id', type=int, required=True, help='Imagen id')
-feedback_muñeca_args.add_argument('etiqueta 1', type=bool, required=False, help='etiqueta 1')
-feedback_muñeca_args.add_argument('etiqueta 2', type=bool, required=False, help='etiqueta 2')
+feedback_muñeca_args.add_argument('fractura', type=bool, required=False, help='fractura')
+feedback_muñeca_args.add_argument('sin_fractura', type=bool, required=False, help='sin_fractura')
 feedback_muñeca_args.add_argument('comentario', type=str, required=False, help='Comentario del médico')

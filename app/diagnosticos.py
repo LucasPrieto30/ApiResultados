@@ -712,10 +712,13 @@ class FeedbackMuñeca(Resource):
     @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
         feedback = feedback_muñeca_args.parse_args()
+        feedback["fractura"] = request.values.get('fractura') is not None and request.values.get('fractura').lower() == 'true' 
+        feedback["sin_fractura"] = request.values.get('sin_fractura') is not None and request.values.get('sin_fractura').lower() == 'true' 
         feedback["imagen_id"] = request.values.get('imagen_id')
         print(feedback)
         try:
-            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&etiqueta1=algo'
+            #corregir la url cuando este hecho el endpoint del equipo 2
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&fractura={feedback["fractura"]}&sin_fractura={feedback["sin_fractura"]}'
             if (request.values.get('comentario') is not None):
                 url += "&comentario="+request.values.get('comentario')
             print(url)
