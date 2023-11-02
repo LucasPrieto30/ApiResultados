@@ -243,6 +243,9 @@ class PruebaImagen(Resource):
     @ns2.expect(diag_parser_corazon)
     def post(self):
         nuevo_diagnostico = diag_parser_corazon.parse_args()
+        nuevo_diagnostico["palpitaciones"] = request.values.get('hermaturia').lower() == 'true' 
+        nuevo_diagnostico["dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo"] = request.values.get('dolor_lumbar').lower() == 'true' 
+        nuevo_diagnostico["disnea"] = request.values.get('disnea').lower() == 'true' 
         nuevo_diagnostico["modelo_id"] = 3             
         img = request.files['imagen']
        
@@ -252,6 +255,13 @@ class PruebaImagen(Resource):
             img.save(os.path.join('app/static', filename))
         else:
             return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+        
+        datos = {
+            'palpitaciones':nuevo_diagnostico['palpitaciones'],
+            'dolor_tor_cm_msi':nuevo_diagnostico['dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo'],
+            'disnea': nuevo_diagnostico['disnea']
+        }
+
         connection = get_connection()
         with connection.cursor() as cursor:
             cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
