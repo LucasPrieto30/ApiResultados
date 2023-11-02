@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields, api, reqparse
 import psycopg2
-from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_riñones_args, feedback_corazon_args, feedback_pulmones_args, feedback_rodilla_args, diag_parser_riñones,diag_parser_rodilla, feedback_muñeca_args
+from .modelos import post_model, pacienteDiagnostico, post_model2, historial_parser, diag_parser_cerebro, diag_parser_pulmones, diag_parser_corazon, feedback_cerebro_args, feedback_riñones_args, feedback_corazon_args, feedback_pulmones_args, feedback_rodilla_args, diag_parser_riñones,diag_parser_rodilla, feedback_muñeca_args, diag_parser_muñeca
 from .crud_diagnosticos import CrudDiagnostico
 from flask import jsonify, request
 from database.db import get_connection
@@ -97,6 +97,7 @@ class HistorialResource(Resource):
                     "imagen": base64.b64encode(base64.b64decode(diagnostico[11])).decode('utf-8'),
                     "datos_paciente": desencriptar_campo(diagnostico[12], clave_maestra)
                 }
+
                 # Verificar el rol y agregar o excluir la columna "resultado"
                 if rol_id == 4 or rol_id == 1:
                     diagnostico_dict["resultado"] = diagnostico[4]
@@ -404,6 +405,64 @@ class PruebaImagen(Resource):
                 data = response.json()
                 data.pop('image', None)
 
+                # guarda el diagnostico cuando se obtiene el response
+                id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
+                data["id"] = id_diagnostico
+                data["imagen_id"] = nuevo_diagnostico["imagen_id"]
+                return data, 200
+            else:
+                return {'error': 'Error al obtener la predicción del modelo', 'status_code': response.status_code}, 500
+        except Exception as ex:
+            return {'message': "Error al obtener la predicción del modelo: " + str(ex)}, 500
+
+@ns2.route('/predecir/muñeca')
+class PruebaImagen(Resource):
+    @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
+    @ns2.expect(diag_parser_muñeca)
+    def post(self):
+        nuevo_diagnostico = diag_parser_muñeca.parse_args()
+        nuevo_diagnostico["modelo_id"] = 6             
+        img = request.files['imagen']
+       
+        filename = ""
+        if img and allowed_file(img.filename):
+            filename = secure_filename(img.filename)
+            img.save(os.path.join('app/static', filename))
+        else:
+            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+        
+        datos = {
+            'limitacion_funcional': nuevo_diagnostico['limitacion_funcional'],
+            'edema': nuevo_diagnostico['edema'],
+            'deformidad': nuevo_diagnostico['deformidad']
+        }
+        
+        connection = get_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
+            siguiente_imagen_id = cursor.fetchone()[0]
+            if (siguiente_imagen_id is None):
+                siguiente_imagen_id = 1
+            nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
+        try:
+            datos_paciente = {
+                'fecha_nacimiento': nuevo_diagnostico['fecha_nacimiento'],
+                'peso': nuevo_diagnostico['peso'],
+                'altura': nuevo_diagnostico['altura'],
+                'sexo': nuevo_diagnostico['sexo'],
+            }
+            datos_paciente_json = json.dumps(datos_paciente)
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict-fracture'   #imagen_id={nuevo_diagnostico["imagen_id"]}&datos_paciente={datos_paciente_json}
+        
+            with open(os.path.join('app/static', filename), 'rb') as file:
+                image_data = file.read()
+            
+            files = {'file': (filename, image_data, 'image/jpeg')}
+
+            response = requests.post(url, files=files) 
+    
+            if response.status_code == 200:
+                data = response.json()
                 # guarda el diagnostico cuando se obtiene el response
                 id_diagnostico = crud.crear_diagnostico(nuevo_diagnostico, data, image_data)
                 data["id"] = id_diagnostico

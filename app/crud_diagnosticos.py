@@ -52,6 +52,12 @@ class CrudDiagnostico:
                     'prueba_CA_positiva':datos_diagnostico['CA_positiva'],
                     'impotencia_funcional':datos_diagnostico['impotencia_funcional']
                 }
+            elif(datos_diagnostico['modelo_id'] == 6):
+                datos_complementarios = {
+                    'limitacion_funcional':datos_diagnostico['limitacion_funcional'],
+                    'edema':datos_diagnostico['edema'],
+                    'deformidad':datos_diagnostico['deformidad']
+                }
 
             datos_paciente = {
                 'fecha_nacimiento': datos_diagnostico['fecha_nacimiento'],
