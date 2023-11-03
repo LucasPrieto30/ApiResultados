@@ -243,9 +243,9 @@ class PruebaImagen(Resource):
     @ns2.expect(diag_parser_corazon)
     def post(self):
         nuevo_diagnostico = diag_parser_corazon.parse_args()
-        nuevo_diagnostico["palpitaciones"] = request.values.get('hermaturia').lower() == 'true' 
-        nuevo_diagnostico["dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo"] = request.values.get('dolor_lumbar').lower() == 'true' 
-        nuevo_diagnostico["disnea"] = request.values.get('disnea').lower() == 'true' 
+        nuevo_diagnostico["palpitaciones"] = request.values.get('palpitaciones') is not None and request.values.get('palpitaciones').lower()  == 'true' 
+        nuevo_diagnostico["dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo"] = request.values.get('dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo') is not None and request.values.get('dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo').lower() == 'true' 
+        nuevo_diagnostico["disnea"] = request.values.get('disnea') is not None and request.values.get('disnea').lower() == 'true' 
         nuevo_diagnostico["modelo_id"] = 3             
         img = request.files['imagen']
        
@@ -277,7 +277,7 @@ class PruebaImagen(Resource):
                 'sexo': nuevo_diagnostico['sexo'],
             }
             datos_paciente_json = json.dumps(datos_paciente)
-            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict?imagen_id={nuevo_diagnostico["imagen_id"]}&datos_paciente={datos_paciente_json}'
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict-egc' #?imagen_id={nuevo_diagnostico["imagen_id"]}&datos_paciente={datos_paciente_json}
         
             with open(os.path.join('app/static', filename), 'rb') as file:
                 image_data = file.read()
