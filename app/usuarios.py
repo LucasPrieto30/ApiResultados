@@ -11,7 +11,7 @@ from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico , validar_contrasena
 from flask_restx import Api
-from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass, guardar_codigo, borrar_codigo
+from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass#, guardar_codigo, borrar_codigo
 import argparse
 import datetime
 import re
