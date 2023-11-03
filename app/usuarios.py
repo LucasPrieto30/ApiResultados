@@ -16,7 +16,7 @@ import argparse
 import datetime
 import re
 from .correo import enviar_codigo_correo
-from app.jwt_config import require_auth, generate_token
+from app.jwt_config import require_auth, generate_token, verify_token
 
 SECRET_KEY = 'dtcp23'
 # Convertir la clave secreta a bytes
@@ -409,3 +409,24 @@ class VerificarCodigo(Resource):
 			except Exception as ex:
 				return {"message": str(ex)}, 500	
 
+from flask import request
+import jwt
+# Crear una nueva instancia de Namespace si aún no la tienes
+# ns_usuarios = Namespace('usuarios', description='Namespace para usuarios')
+verificacion_token_model = ns_usuarios.model('VerificacionTokenModel', {
+    'token': fields.String(description='Token de autenticación')
+})
+
+@ns_usuarios.route('/verificarUsuario')
+class VerificarToken(Resource):
+    @ns_usuarios.expect(verificacion_token_model)
+    @ns_usuarios.doc(responses={200: 'Token valido', 500: 'Error interno del servidor', 401: 'Token invalido'})
+    def post(self):
+        token = request.json.get('token')  # Obtener el token del cuerpo de la solicitud
+        if verify_token(token):
+            payload = jwt.decode(token, obtener_clave_desde_Medico(), algorithms=['HS256'])
+            #print(payload['dni'])
+            # como es valido le doy los datos
+            return payload['dni'], 200
+        else:
+            return {'token': 'Token inválido o faltante'}, 401
