@@ -360,10 +360,10 @@ class Login(Resource):
 				if cant_dias>= 60: 
 					return {"message": "Es necesario cambiar la contraseña."} 
 			#si el usuario es auditor o admin, se le envia un codigo de verificacion por mail
-				elif usuarioExistente[2] == 1 or usuarioExistente[2] == 2:
-					codigo_otp = otp_generator.now()
-					if guardar_codigo(codigo_otp, usuarioExistente[3]):
-						enviar_codigo_correo(usuarioExistente[4], codigo_otp)
+				# elif usuarioExistente[2] == 1 or usuarioExistente[2] == 2:
+				# 	codigo_otp = otp_generator.now()
+				# 	if guardar_codigo(codigo_otp, usuarioExistente[3]):
+				# 		enviar_codigo_correo(usuarioExistente[4], codigo_otp)
 					#return {'message': 'Se requiere doble verificación'}, 200
 			token = generate_token(usuario)
 
