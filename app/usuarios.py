@@ -11,7 +11,7 @@ from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico , validar_contrasena
 from flask_restx import Api
-from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass
+from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass, guardar_codigo, borrar_codigo
 import argparse
 import datetime
 import re
@@ -362,11 +362,12 @@ class Login(Resource):
 			#si el usuario es auditor o admin, se le envia un codigo de verificacion por mail
 				elif usuarioExistente[2] == 1 or usuarioExistente[2] == 2:
 					codigo_otp = otp_generator.now()
-					enviar_codigo_correo(usuarioExistente[4], codigo_otp)
+					if guardar_codigo(codigo_otp, usuarioExistente[3]):
+						enviar_codigo_correo(usuarioExistente[4], codigo_otp)
 					#return {'message': 'Se requiere doble verificación'}, 200
 			token = generate_token(usuario)
-				
-				# Incluir el token en la respuesta
+
+			# Incluir el token en la respuesta
 			usuario_data = {
 				'token': token,
 				'id': usuarioExistente[0],
@@ -385,10 +386,26 @@ class VerificarCodigo(Resource):
 	@ns_usuarios.doc(responses={200: 'Código válido', 401: 'Código inválido'})
 	@ns_usuarios.expect(verificar_codigo_model)
 	def post(self):
-		args = verificar_codigo_model.parse_args()
-        # Verificar el código OTp
-		if otp_generator.verify(args['codigo'], valid_window=1):
-			return {'mensaje': 'Código válido.'}, 200
-		else:
-			return {'mensaje': 'Código inválido.'}, 401
+			args = verificar_codigo_model.parse_args()
+			dni = args['dni']
+			codigo = args['codigo']
+			
+			try:
+				connection = get_connection()
+				with connection.cursor() as cursor:
+					cursor.execute("SELECT verify_code FROM public.usuario WHERE dni = %s", (dni,))
+					resultado = cursor.fetchone()
+					cod_db= resultado[0]
+					cursor.close() 
+					connection.close() 
+					
+					# Verificar el código OTP 
+					if cod_db == codigo: 
+						borrar_codigo(dni)
+						# El código es válido y corresponde al usuario 
+						return {'msg': 'Código válido'}, 200
+					else:
+						return {'msg': 'Código inválido'}, 401
+			except Exception as ex:
+				return {"message": str(ex)}, 500	
 

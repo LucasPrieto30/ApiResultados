@@ -137,8 +137,9 @@ login_model_response = api.model('Usuario', {
 
 })
 
-verificar_codigo_model =  parser = reqparse.RequestParser()
-parser.add_argument('codigo', type=str, required=True, help='Código OTP de 6 dígitos')
+verificar_codigo_model = reqparse.RequestParser()
+verificar_codigo_model.add_argument('codigo', type=int, required=True, help='Código OTP de 6 dígitos')
+verificar_codigo_model.add_argument('dni', type=str, required=True, help='DNI usuario')
 
 feedback_cerebro_args = reqparse.RequestParser()
 feedback_cerebro_args.add_argument('imagen_id', type=int, required=True, help='Imagen id')
