@@ -195,7 +195,7 @@ class PruebaImagen(Resource):
             filename = secure_filename(img.filename)
             img.save(os.path.join('app/static', filename))
         else:
-            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}, 400
 
         datos = {
             'puntada_lateral':nuevo_diagnostico['puntada_lateral'],
@@ -258,7 +258,7 @@ class PruebaImagen(Resource):
             filename = secure_filename(img.filename)
             img.save(os.path.join('app/static', filename))
         else:
-            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}, 400
         
         datos = {
             'palpitaciones':nuevo_diagnostico['palpitaciones'],
@@ -322,7 +322,7 @@ class PruebaImagen(Resource):
             filename = secure_filename(img.filename)
             img.save(os.path.join('app/static', filename))
         else:
-            return {'msg': 'Solo se permiten cargar archivos jpg y jpeg'}
+            return {'msg': 'Solo se permiten cargar archivos jpg y jpeg'}, 400
 
         datos = {
             'hermaturia':nuevo_diagnostico['hermaturia'],
@@ -383,9 +383,8 @@ class PruebaImagen(Resource):
         nuevo_diagnostico["modelo_id"] = 5
 
         archivo_zip = request.files['archivo'] 
-
-        if not archivo_zip: 
-            return {'mensaje': 'No se proporcionó el archivo ZIP'}, 400 
+        if not archivo_zip or archivo_zip.filename.endswith('.zip') == False: 
+            return {'msg': 'Solo se permiten cargar archivos zip'}, 400 
  
         zip_data = archivo_zip.read()
        
@@ -449,7 +448,7 @@ class PruebaImagen(Resource):
             filename = secure_filename(img.filename)
             img.save(os.path.join('app/static', filename))
         else:
-            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}
+            return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}, 400
         
         datos = {
             'limitacion_funcional': nuevo_diagnostico['limitacion_funcional'],
