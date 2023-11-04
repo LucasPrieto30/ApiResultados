@@ -58,7 +58,7 @@ class CrudDiagnostico:
                 }
             elif(datos_diagnostico['modelo_id'] == 6):
                 datos_complementarios = {
-                    'limitacion_funcional':datos_diagnostico['limitacion_funcional'],
+                    'dolor_con_limitacion':datos_diagnostico['dolor_con_limitacion'],
                     'edema':datos_diagnostico['edema'],
                     'deformidad':datos_diagnostico['deformidad']
                 }

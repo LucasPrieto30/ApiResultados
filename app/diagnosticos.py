@@ -437,7 +437,7 @@ class PruebaImagen(Resource):
     @ns2.expect(diag_parser_muñeca)
     def post(self):
         nuevo_diagnostico = diag_parser_muñeca.parse_args()
-        nuevo_diagnostico["limitacion_funcional"] = request.values.get('limitacion_funcional').lower() == 'true' 
+        nuevo_diagnostico["dolor_con_limitacion"] = request.values.get('dolor_con_limitacion').lower() == 'true' 
         nuevo_diagnostico["edema"] = request.values.get('edema').lower() == 'true' 
         nuevo_diagnostico["deformidad"] = request.values.get('deformidad').lower() == 'true' 
         nuevo_diagnostico["modelo_id"] = 6             
@@ -450,12 +450,6 @@ class PruebaImagen(Resource):
         else:
             return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}, 400
         
-        datos = {
-            'limitacion_funcional': nuevo_diagnostico['limitacion_funcional'],
-            'edema': nuevo_diagnostico['edema'],
-            'deformidad': nuevo_diagnostico['deformidad']
-        }
-        
         connection = get_connection()
         with connection.cursor() as cursor:
             cursor.execute("SELECT (MAX(imagen_id) + 1) as siguiente_id FROM public.imagen_analisis;")
@@ -464,15 +458,7 @@ class PruebaImagen(Resource):
                 siguiente_imagen_id = 1
             nuevo_diagnostico["imagen_id"] = siguiente_imagen_id
         try:
-            datos_paciente = {
-                'fecha_nacimiento': nuevo_diagnostico['fecha_nacimiento'],
-                'peso': nuevo_diagnostico['peso'],
-                'altura': nuevo_diagnostico['altura'],
-                'sexo': nuevo_diagnostico['sexo'],
-            }
-            datos_paciente_json = json.dumps(datos_paciente)
-            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict-fracture'   #imagen_id={nuevo_diagnostico["imagen_id"]}&datos_paciente={datos_paciente_json}
-        
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict-fracture?id_imagen={nuevo_diagnostico["imagen_id"]}&dolor_con_limitacion={nuevo_diagnostico["dolor_con_limitacion"]}&edema={nuevo_diagnostico["edema"]}&deformidad={nuevo_diagnostico["deformidad"]}&fecha_nacimiento={nuevo_diagnostico["fecha_nacimiento"]}&peso={nuevo_diagnostico["peso"]}&altura={nuevo_diagnostico["altura"]}&sexo={nuevo_diagnostico["sexo"]}'
             with open(os.path.join('app/static', filename), 'rb') as file:
                 image_data = file.read()
             
@@ -723,24 +709,31 @@ class FeedbackRodilla(Resource):
 class FeedbackMuñeca(Resource):
     @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_muñeca_args)
-    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    @feedbackNs.doc(responses={200: 'Éxito', 400: "Solicitud invalida", 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
         feedback = feedback_muñeca_args.parse_args()
         feedback["fractura"] = request.values.get('fractura') is not None and request.values.get('fractura').lower() == 'true' 
-        feedback["sin_fractura"] = request.values.get('sin_fractura') is not None and request.values.get('sin_fractura').lower() == 'true' 
+        feedback["sano"] = request.values.get('sano') is not None and request.values.get('sano').lower() == 'true' 
         feedback["imagen_id"] = request.values.get('imagen_id')
-        print(feedback)
+
         try:
             #corregir la url cuando este hecho el endpoint del equipo 2
-            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&fractura={feedback["fractura"]}&sin_fractura={feedback["sin_fractura"]}'
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/feedback-fracture?id_imagen={feedback["imagen_id"]}'
+            if (request.values.get('fractura') is not None and request.values.get('fractura').lower() == 'true' ):
+                url += "&fractura="+request.values.get('fractura')
+            if (request.values.get('sano') is not None and request.values.get('sano').lower() == 'true'):
+                url += "&sano="+request.values.get('sano')
             if (request.values.get('comentario') is not None):
                 url += "&comentario="+request.values.get('comentario')
-            print(url)
+
             response = requests.post(url)
+
             # Procesar la respuesta
             if response.status_code == 200:
                 return {"message": "Feedback enviado correctamente"}, 200
             elif response.status_code == 404:
                 return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+            elif response.status_code == 400:
+                return {"error": "Solicitud invalida"}, 400
         except Exception as ex:
            return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500

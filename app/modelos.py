@@ -95,7 +95,7 @@ diag_parser_rodilla.add_argument('sexo', type=str, required=True, help='Sexo del
 #  parametros para diagnostico del modelo: fractura de muñeca
 diag_parser_muñeca =  reqparse.RequestParser()
 diag_parser_muñeca.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
-diag_parser_muñeca.add_argument('limitacion_funcional', type=bool, required=True, help='Dolor con limitacion funcional')
+diag_parser_muñeca.add_argument('dolor_con_limitacion', type=bool, required=True, help='Dolor con limitacion funcional')
 diag_parser_muñeca.add_argument('edema', type=bool, required=True, help='Edema')
 diag_parser_muñeca.add_argument('deformidad', type=bool, required=True, help='Deformidad')
 diag_parser_muñeca.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
@@ -182,5 +182,5 @@ feedback_rodilla_args.add_argument('comentario', type=str, required=False, help=
 feedback_muñeca_args = reqparse.RequestParser()
 feedback_muñeca_args.add_argument('imagen_id', type=int, required=True, help='Imagen id')
 feedback_muñeca_args.add_argument('fractura', type=bool, required=False, help='fractura')
-feedback_muñeca_args.add_argument('sin_fractura', type=bool, required=False, help='sin_fractura')
+feedback_muñeca_args.add_argument('sano', type=bool, required=False, help='sano')
 feedback_muñeca_args.add_argument('comentario', type=str, required=False, help='Comentario del médico')
