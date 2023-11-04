@@ -280,3 +280,29 @@ def get_ultimo_cambio_pass(dni):
     if result is not None:
         return result[0] 
     return None
+
+def guardar_codigo(codigo, dni):
+    try:
+        connection = get_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("""UPDATE public.usuario SET verify_code=%s WHERE dni=%s;""", (codigo,dni,))
+            connection.commit()
+            return True
+    except Exception as e:
+        connection.rollback()
+        return {"success": False, "message": "Error inesperado: " + str(e)}
+    finally:
+        connection.close()
+
+def borrar_codigo(dni):
+    try:
+        connection = get_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("""UPDATE public.usuario SET verify_code=NULL WHERE dni=%s;""", (dni,))
+            connection.commit()
+            return True
+    except Exception as e:
+        connection.rollback()
+        return {"success": False, "message": "Error inesperado: " + str(e)}
+    finally:
+        connection.close()

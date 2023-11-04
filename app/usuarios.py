@@ -11,7 +11,7 @@ from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico , validar_contrasena
 from flask_restx import Api
-from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass#, guardar_codigo, borrar_codigo
+from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass, guardar_codigo, borrar_codigo
 import argparse
 import datetime
 import re
@@ -360,11 +360,11 @@ class Login(Resource):
 				if cant_dias>= 60: 
 					return {"message": "Es necesario cambiar la contraseña."} 
 			#si el usuario es auditor o admin, se le envia un codigo de verificacion por mail
-				# elif usuarioExistente[2] == 1 or usuarioExistente[2] == 2:
-				# 	codigo_otp = otp_generator.now()
-				# 	if guardar_codigo(codigo_otp, usuarioExistente[3]):
-				# 		enviar_codigo_correo(usuarioExistente[4], codigo_otp)
-					#return {'message': 'Se requiere doble verificación'}, 200
+				elif usuarioExistente[2] == 1 or usuarioExistente[2] == 2:
+					codigo_otp = otp_generator.now()
+					if guardar_codigo(codigo_otp, usuarioExistente[3]):
+						enviar_codigo_correo(usuarioExistente[4], codigo_otp)
+			
 			token = generate_token(usuario)
 
 			# Incluir el token en la respuesta
