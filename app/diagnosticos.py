@@ -399,8 +399,7 @@ class PruebaImagen(Resource):
                 cursor.close()
                 connection.close()
             # URL de la API externa a la que deseas enviar la imagen   
-            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict-lca'
-           
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict-lca?id_imagen={nuevo_diagnostico["imagen_id"]}&inestabilidad={nuevo_diagnostico["sensacion_inestabilidad"]}&cajon_anterior_positivo={nuevo_diagnostico["CA_positiva"]}&impotencia_funcional={nuevo_diagnostico["impotencia_funcional"]}&fecha_nacimiento={nuevo_diagnostico["fecha_nacimiento"]}&peso={nuevo_diagnostico["peso"]}&altura={nuevo_diagnostico["altura"]}&sexo={nuevo_diagnostico["sexo"]}'
             # falta agregar datos complementarios a la request
             files = {'file': ('archivo_zip', zip_data)}
 
@@ -410,7 +409,8 @@ class PruebaImagen(Resource):
             # Procesar la respuesta
             if response.status_code == 200:
                 # Si la respuesta es JSON, puedes cargarla como un diccionario
-                image_data = response.json().get('image')
+                image_data = response.json()
+                print(image_data)
                 data = response.json()
                 data.pop('image', None)
 
