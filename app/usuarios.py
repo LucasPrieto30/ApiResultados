@@ -105,9 +105,8 @@ class Medicos(Resource):
 @ns_usuarios.route("/<int:id>")
 class Medico(Resource):
 	#@ns_usuarios.expect(parser)
-	@require_auth
 	@ns_usuarios.doc(responses={200: 'Éxito', 401: 'Acceso no autorizado', 404: 'Médico no encontrado'})
-	def get(self, payload,id):
+	def get(self,id):
 		#args = parser.parse_args()  # Analiza los argumentos de la solicitud
 		# Obtén el ID y la clave de los argumentos
 		usuario_id = id
@@ -224,9 +223,8 @@ class Usuarios(Resource):
 
 @ns_usuarios.route('/<string:dni>')
 class Usuario(Resource):
-	@require_auth
 	@ns_usuarios.doc(responses={200: 'Borrado exitosamente', 404: 'Médico no encontrado', 500: 'Error interno del servidor'})
-	def delete(self,payload ,dni):
+	def delete(self ,dni):
 		try:
 			connection = get_connection()
 			with connection.cursor() as cursor:
