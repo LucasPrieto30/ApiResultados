@@ -248,7 +248,7 @@ class PruebaImagen(Resource):
     def post(self):
         nuevo_diagnostico = diag_parser_corazon.parse_args()
         nuevo_diagnostico["palpitaciones"] = request.values.get('palpitaciones') is not None and request.values.get('palpitaciones').lower()  == 'true' 
-        nuevo_diagnostico["dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo"] = request.values.get('dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo') is not None and request.values.get('dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo').lower() == 'true' 
+        nuevo_diagnostico["dolor_superior_izquierdo"] = request.values.get('dolor_superior_izquierdo') is not None and request.values.get('dolor_superior_izquierdo').lower() == 'true' 
         nuevo_diagnostico["disnea"] = request.values.get('disnea') is not None and request.values.get('disnea').lower() == 'true' 
         nuevo_diagnostico["modelo_id"] = 3             
         img = request.files['imagen']
@@ -259,12 +259,6 @@ class PruebaImagen(Resource):
             img.save(os.path.join('app/static', filename))
         else:
             return {'msg': 'Solo se permiten cargar archivos png, jpg y jpeg'}, 400
-        
-        datos = {
-            'palpitaciones':nuevo_diagnostico['palpitaciones'],
-            'dolor_tor_cm_msi':nuevo_diagnostico['dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo'],
-            'disnea': nuevo_diagnostico['disnea']
-        }
 
         connection = get_connection()
         with connection.cursor() as cursor:
@@ -281,7 +275,7 @@ class PruebaImagen(Resource):
                 'sexo': nuevo_diagnostico['sexo'],
             }
             datos_paciente_json = json.dumps(datos_paciente)
-            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict-egc' #?imagen_id={nuevo_diagnostico["imagen_id"]}&datos_paciente={datos_paciente_json}
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/predict-egc?id_imagen={nuevo_diagnostico["imagen_id"]}&palpitaciones={nuevo_diagnostico["palpitaciones"]}&dolor_superior_izquierdo={nuevo_diagnostico["dolor_superior_izquierdo"]}&disnea={nuevo_diagnostico["disnea"]}&fecha_nacimiento={nuevo_diagnostico["fecha_nacimiento"]}&peso={nuevo_diagnostico["peso"]}&altura={nuevo_diagnostico["altura"]}&sexo={nuevo_diagnostico["sexo"]}'
         
             with open(os.path.join('app/static', filename), 'rb') as file:
                 image_data = file.read()
@@ -465,7 +459,7 @@ class PruebaImagen(Resource):
             files = {'file': (filename, image_data, 'image/jpeg')}
 
             response = requests.post(url, files=files) 
-    
+
             if response.status_code == 200:
                 data = response.json()
                 # guarda el diagnostico cuando se obtiene el response
@@ -667,7 +661,19 @@ class FeedbackCorazon(Resource):
         feedback["imagen_id"] = request.values.get('imagen_id')
         print(feedback)
         try:
-            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&contraccion_ventricular_prematura={feedback["contraccion_ventricular_prematura"]}&fusion_de_latido_ventricular_y_normal={feedback["fusion_de_latido_ventricular_y_normal"]}&infarto_de_miocardio={feedback["infarto_de_miocardio"]}&latido_no_clasificable={feedback["latido_no_clasificable"]}&latido_normal={feedback["latido_normal"]}&latido_prematuro_supraventricular={feedback["latido_prematuro_supraventricular"]}'
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/feedback-egc?id_imagen={feedback["imagen_id"]}'
+            if(request.values.get('contraccion_ventricular_prematura') is not None and request.values.get('contraccion_ventricular_prematura').lower() == 'true'):
+                url += '&contraccion=' + request.values.get('contraccion_ventricular_prematura')
+            if(request.values.get('fusion_de_latido_ventricular_y_normal') is not None and request.values.get('fusion_de_latido_ventricular_y_normal').lower() == 'true' ):
+                url += "&fusion=" + request.values.get('fusion_de_latido_ventricular_y_normal')
+            if(request.values.get('infarto_de_miocardio') is not None and request.values.get('infarto_de_miocardio').lower() == 'true'):
+                url += "&infarto=" + request.values.get('infarto_de_miocardio')
+            if(request.values.get('latido_no_clasificable') is not None and request.values.get('latido_no_clasificable').lower() == 'true'):
+                url += "&no_clasificable=" + request.values.get('latido_no_clasificable')
+            if(request.values.get('latido_normal') is not None and request.values.get('latido_normal').lower() == 'true'):
+                url += "&latido_normal=" + request.values.get('latido_normal')
+            if(request.values.get('latido_prematuro_supraventricular') is not None and request.values.get('latido_prematuro_supraventricular').lower() == 'true'):
+                url += "&prematuro_supraventricular=" + request.values.get('latido_prematuro_supraventricular')
             if (request.values.get('comentario') is not None):
                 url += "&comentario="+request.values.get('comentario')
             print(url)
@@ -677,6 +683,8 @@ class FeedbackCorazon(Resource):
                 return {"message": "Feedback enviado correctamente"}, 200
             elif response.status_code == 404:
                 return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+            elif response.status_code == 400:
+                return {"error": "Solicitud invalida"}, 400
         except Exception as ex:
            return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
         

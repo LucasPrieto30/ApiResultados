@@ -39,7 +39,7 @@ class CrudDiagnostico:
             elif(datos_diagnostico['modelo_id'] == 3):
                 datos_complementarios = {
                     'palpitaciones': datos_diagnostico['palpitaciones'],
-                    'dolor_tor_cm_msi': datos_diagnostico['dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo'],
+                    'dolor_superior_izquierdo': datos_diagnostico['dolor_superior_izquierdo'],
                     'disnea': datos_diagnostico['disnea']
                 }
             elif(datos_diagnostico['modelo_id'] == 4):

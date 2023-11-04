@@ -54,7 +54,7 @@ diag_parser_pulmones.add_argument('sexo', type=str, required=True, help='Sexo de
 diag_parser_corazon = reqparse.RequestParser()
 diag_parser_corazon.add_argument('imagen', type=FileStorage, location='files', required=True, help='Imagen')
 diag_parser_corazon.add_argument('palpitaciones', type=bool, required=False, help='palpitaciones')
-diag_parser_corazon.add_argument('dolor_toracico_irradiado_a_cuello_mandíbula_miembro_superior_izquierdo', type=bool, required=False, help='Dolor torácico o irradiado a cuello, mandíbula y miembro superior izquierdo')
+diag_parser_corazon.add_argument('dolor_superior_izquierdo', type=bool, required=False, help='Dolor torácico o irradiado a cuello, mandíbula y miembro superior izquierdo')
 diag_parser_corazon.add_argument('disnea', type=bool, required=False, help='Disnea')
 
 diag_parser_corazon.add_argument('id_usuario', type=int, required=True, help='ID de usuario')
