@@ -105,6 +105,7 @@ class Medicos(Resource):
 @ns_usuarios.route("/<int:id>")
 class Medico(Resource):
 	#@ns_usuarios.expect(parser)
+	@ns_usuarios.doc(security=None)
 	@ns_usuarios.doc(responses={200: 'Éxito', 401: 'Acceso no autorizado', 404: 'Médico no encontrado'})
 	def get(self,id):
 		#args = parser.parse_args()  # Analiza los argumentos de la solicitud
@@ -152,6 +153,7 @@ import psycopg2
 #@ns_usuarios.route('/admin/alta') se cambio
 @ns_usuarios.route('/registro')
 class Usuarios(Resource):
+	@ns_usuarios.doc(security=None)
 	@ns_usuarios.expect(user_parser)
 	@ns_usuarios.doc(responses={201: 'Agregado exitosamente', 409: 'El usuario ya está registrado', 400: 'Solicitud inválida', 500: 'Error interno del servidor'})
 	def post(self):
@@ -223,6 +225,7 @@ class Usuarios(Resource):
 
 @ns_usuarios.route('/<string:dni>')
 class Usuario(Resource):
+	@ns_usuarios.doc(security=None)
 	@ns_usuarios.doc(responses={200: 'Borrado exitosamente', 404: 'Médico no encontrado', 500: 'Error interno del servidor'})
 	def delete(self ,dni):
 		try:
@@ -248,10 +251,10 @@ class Usuario(Resource):
 		
 @ns_usuarios.route('/update-user-informacion', methods=['PATCH'])
 class UpdateUserInfo(Resource):
-	@require_auth
+	@ns_usuarios.doc(security=None)
 	@ns_usuarios.doc(responses={200: 'Información de usuario actualizada', 404: 'Médico no encontrado', 500: 'Error interno del servidor'})
 	@ns_usuarios.expect(user_parser_update)
-	def patch(self, payload):
+	def patch(self):
 		try:
 			args = user_parser_update.parse_args()
 			dni = args['dni']
@@ -328,6 +331,7 @@ login_model = ns_usuarios.model('LoginModel', {
 #@ns_usuarios.response(404, 'Usuario inexistente')
 @ns_usuarios.route('/login')
 class Login(Resource):
+	@ns_usuarios.doc(security=None)
 	@ns_usuarios.response(200, 'Correcto. Bienvenido', login_model_response)
 	@ns_usuarios.response(401, 'Contraseña incorrecta')
 	@ns_usuarios.response(404, 'Usuario inexistente')
@@ -384,6 +388,7 @@ class Login(Resource):
 
 @ns_usuarios.route('/verificacion')
 class VerificarCodigo(Resource):
+	@ns_usuarios.doc(security=None)
 	@ns_usuarios.doc(responses={200: 'Código válido', 401: 'Código inválido'})
 	@ns_usuarios.expect(verificar_codigo_model)
 	def post(self):
@@ -420,6 +425,7 @@ verificacion_token_model = ns_usuarios.model('VerificacionTokenModel', {
 
 @ns_usuarios.route('/verificarUsuario')
 class VerificarToken(Resource):
+    @ns_usuarios.doc(security=None)
     @ns_usuarios.expect(verificacion_token_model)
     @ns_usuarios.doc(responses={200: 'Token valido', 500: 'Error interno del servidor', 401: 'Token invalido'})
     def post(self):

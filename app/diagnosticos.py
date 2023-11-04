@@ -54,6 +54,7 @@ def desencriptar_campo(campo, clave_maestra):
 
 @ns2.route('/historial')
 class HistorialResource(Resource):
+    @ns2.doc(security=None)
     @ns2.doc(responses={200: 'Éxito', 400: 'Solicitud inválida', 500: 'Error interno del servidor'})
     @ns2.expect(historial_parser)
     def get(self):
@@ -114,6 +115,7 @@ class HistorialResource(Resource):
 
 @ns2.route('/predecir/cerebro')
 class PruebaImagen(Resource):
+    @ns2.doc(security=None)
     @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
     @ns2.expect(diag_parser_cerebro)
     def post(self):
@@ -177,6 +179,7 @@ class PruebaImagen(Resource):
         
 @ns2.route('/predecir/pulmones')
 class PruebaImagen(Resource):
+    @ns2.doc(security=None)
     @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
     @ns2.expect(diag_parser_pulmones)
     def post(self):
@@ -239,6 +242,7 @@ class PruebaImagen(Resource):
         
 @ns2.route('/predecir/corazon')
 class PruebaImagen(Resource):
+    @ns2.doc(security=None)
     @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
     @ns2.expect(diag_parser_corazon)
     def post(self):
@@ -300,6 +304,7 @@ class PruebaImagen(Resource):
 
 @ns2.route('/predecir/riñones')
 class PruebaImagen(Resource):
+    @ns2.doc(security=None) 
     @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
     @ns2.expect(diag_parser_riñones)
     def post(self):
@@ -367,6 +372,7 @@ class PruebaImagen(Resource):
 
 @ns2.route('/predecir/rodilla')
 class PruebaImagen(Resource):
+    @ns2.doc(security=None)
     @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
     @ns2.expect(diag_parser_rodilla)
     def post(self):
@@ -427,7 +433,7 @@ class PruebaImagen(Resource):
 
 @ns2.route('/predecir/muñeca')
 class PruebaImagen(Resource):
-    @require_auth
+    @ns2.doc(security=None)
     @ns2.doc(responses={200: 'Éxito', 500: 'Error al obtener la predicción del modelo', 400: 'Solicitud inválida'})
     @ns2.expect(diag_parser_muñeca)
     def post(self):
@@ -489,6 +495,7 @@ class PruebaImagen(Resource):
 
 @ns2.route("/<int:id_diagnostico>")
 class DiagnosticoResource(Resource):
+    @ns2.doc(security=None)
     @ns2.expect(parser)
     @ns2.doc(responses={200: 'Éxito', 404: 'No existe diagnostico con el id seleccionado'})
     def get(self, id_diagnostico):
@@ -503,6 +510,7 @@ class DiagnosticoResource(Resource):
 
 @ns2.route("/Delete/<int:id_diagnostico>")
 class DiagnosticoDeleteResource(Resource):
+    @ns2.doc(security=None)
     @ns2.doc(responses={200: 'Diagnóstico eliminado correctamente', 500: 'No se pudo eliminar el diagnóstico'})
     def delete(self,id_diagnostico):
         #diagnostico = crud.resetear_diagnosticos()
@@ -582,6 +590,7 @@ class Imagen(Resource):
 
 @feedbackNs.route('/cerebro')
 class FeedbackCerebro(Resource):
+    @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_cerebro_args)
     @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
@@ -607,6 +616,7 @@ class FeedbackCerebro(Resource):
 
 @feedbackNs.route('/pulmones')
 class FeedbackPulmones(Resource):
+    @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_pulmones_args)
     @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
@@ -631,6 +641,7 @@ class FeedbackPulmones(Resource):
         
 @feedbackNs.route('/riñones')
 class FeedbackRiñones(Resource):
+    @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_riñones_args)
     @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
@@ -657,6 +668,7 @@ class FeedbackRiñones(Resource):
         
 @feedbackNs.route('/corazon')
 class FeedbackCorazon(Resource):
+    @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_corazon_args)
     @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
@@ -685,6 +697,7 @@ class FeedbackCorazon(Resource):
         
 @feedbackNs.route('/rodilla')
 class FeedbackRodilla(Resource):
+    @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_rodilla_args)
     @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
@@ -709,6 +722,7 @@ class FeedbackRodilla(Resource):
         
 @feedbackNs.route('/muñeca')
 class FeedbackMuñeca(Resource):
+    @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_muñeca_args)
     @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
