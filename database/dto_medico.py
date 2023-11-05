@@ -306,3 +306,35 @@ def borrar_codigo(dni):
         return {"success": False, "message": "Error inesperado: " + str(e)}
     finally:
         connection.close()
+
+def set_code(codigo, dni):
+    try:
+        connection = get_connection()
+        with connection.cursor() as cursor:
+            cursor.execute("""UPDATE public.usuario SET reset_code=%s, code_timestamp = NOW() WHERE dni=%s;""", (codigo,dni,))
+            connection.commit()
+            return True
+    except Exception as e:
+        connection.rollback()
+        return {"success": False, "message": "Error inesperado: " + str(e)}
+    finally:
+        connection.close() 
+        
+def checkUsuarioPorDni_reset(dni):
+    connection = get_connection()
+    cursor = connection.cursor()
+    #cursor.execute("SELECT id, nombre, rol_id, dni, pgp_sym_decrypt(email::bytea, %s, 'compress-algo=0,cipher-algo=AES128') AS email, password, especialidad, establecimiento_id, fecha_ultima_password FROM public.usuario where dni = %s", (dni,))
+    cursor.execute("""
+    SELECT 
+        id, nombre, rol_id, dni, 
+        pgp_sym_decrypt(email::bytea, 'q[Ia=wwY=1goiRR') AS email, 
+        password, especialidad, establecimiento_id, fecha_ultima_password 
+    FROM public.usuario 
+    WHERE dni = %s
+    """, (dni,))
+
+    usuarioBD = cursor.fetchone()
+    if usuarioBD:
+        return usuarioBD
+    else:
+        return None

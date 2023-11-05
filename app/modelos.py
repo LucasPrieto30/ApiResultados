@@ -141,6 +141,12 @@ verificar_codigo_model = reqparse.RequestParser()
 verificar_codigo_model.add_argument('codigo', type=int, required=True, help='Código OTP de 6 dígitos')
 verificar_codigo_model.add_argument('dni', type=str, required=True, help='DNI usuario')
 
+reset_password_model = reqparse.RequestParser()
+reset_password_model.add_argument('dni', type=str, required=True, help='DNI usuario')
+reset_password_model.add_argument('codigo', type=int, required=True, help='Código de 4 dígitos')
+reset_password_model.add_argument('new_password', type=str, required=True, help='Nueva contraseña')
+reset_password_model.add_argument('confirm_password', type=str, required=True, help='Confirme contraseña')
+
 feedback_cerebro_args = reqparse.RequestParser()
 feedback_cerebro_args.add_argument('imagen_id', type=int, required=True, help='Imagen id')
 feedback_cerebro_args.add_argument('glioma', type=bool, required=False, help='glioma')

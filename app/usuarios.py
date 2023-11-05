@@ -1,7 +1,7 @@
 import base64
 from flask_restx import Resource, Namespace, fields
 import pyotp
-from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico, login_model, login_model_response, verificar_codigo_model
+from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico, login_model, login_model_response, verificar_codigo_model,reset_password_model
 from flask import jsonify, request
 from database.db import get_connection
 from werkzeug.utils import secure_filename
@@ -11,12 +11,13 @@ from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico , validar_contrasena
 from flask_restx import Api
-from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass, guardar_codigo, borrar_codigo
+from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass, guardar_codigo, borrar_codigo,set_code, checkUsuarioPorDni_reset
 import argparse
 import datetime
 import re
-from .correo import enviar_codigo_correo
+from .correo import enviar_codigo_correo, enviar_codigo_correo_reset
 from app.jwt_config import require_auth, generate_token, verify_token
+import random
 
 SECRET_KEY = 'dtcp23'
 # Convertir la clave secreta a bytes
@@ -437,3 +438,55 @@ class VerificarToken(Resource):
             return payload['dni'], 200
         else:
             return {'token': 'Token inválido o faltante'}, 401
+
+@ns_usuarios.route('/reset_pass/<string:dni>')
+class reset_password(Resource):    
+	def post(self,dni):
+		usuarioExistente = checkUsuarioPorDni_reset(dni) 
+		if not dni:
+			return {'message': 'Por favor, ingrese DNI'}, 400
+		if usuarioExistente:
+			codigo_reset = random.randint(1000, 9999)
+			set_code(codigo_reset,dni)
+			print(f"Done")
+			enviar_codigo_correo_reset(usuarioExistente[4], codigo_reset)
+			print(f"Done")
+			return {'message' : 'Mensaje enviado correctamente'}, 200
+		return {'message' : 'Usuario inexistente'}, 404
+	
+
+@ns_usuarios.route('/reset_password_new/')
+class ResetPassword(Resource):
+    @ns_usuarios.expect(reset_password_model)
+    def post(self):
+        args = reset_password_model.parse_args()
+        dni = args['dni']
+        codigo = args['codigo']
+        new_password = args['new_password']
+        confirm_password = args['confirm_password']
+
+        try:
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT reset_code FROM public.usuario WHERE dni = %s", (dni,))
+                codigoreset = cursor.fetchone()
+                codigoreset = codigoreset[0] if codigoreset else None
+                cursor.close()
+                
+            if codigoreset == codigo:
+                error = validar_contrasena(new_password)
+                if error is not None:
+                    return {"message": error}, 400
+                elif new_password == confirm_password:
+                    with connection.cursor() as cursor:
+                        cursor.execute("UPDATE public.usuario SET reset_code = NULL, password = %s WHERE dni = %s;", (new_password, dni))
+                        connection.commit()
+                    return {'msg': 'Contraseña actualizada.'}, 200
+                else:
+                    return {'msg': 'Contraseñas no coinciden.'}, 400
+            else:
+                return {'msg': 'Codigo invalido'}, 401
+        except Exception as ex:
+            return {"message": str(ex)}, 500
+        finally:
+            connection.close()
