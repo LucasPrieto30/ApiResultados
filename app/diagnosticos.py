@@ -568,10 +568,10 @@ class Imagen(Resource):
 
 @feedbackNs.route('/cerebro')
 class FeedbackCerebro(Resource):
-    @feedbackNs.doc(security=None)
+    @require_auth
     @feedbackNs.expect(feedback_cerebro_args)
     @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
-    def post(self):
+    def post(self,payload):
         feedback = feedback_cerebro_args.parse_args()
         feedback["glioma"] = request.values.get('glioma') is not None and request.values.get('glioma').lower() == 'true' 
         feedback["meningioma"] = request.values.get('meningioma') is not None and request.values.get('meningioma').lower() == 'true' 
