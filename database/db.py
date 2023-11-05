@@ -11,6 +11,6 @@ def get_connection():
                                 user=usuario_bbdd,
                                 password=password_bbdd,
                                 database='pruebas',
-                                port='14963')
+                                port='13808')
     except DatabaseError as ex:
         raise ex
