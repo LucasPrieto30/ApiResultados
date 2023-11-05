@@ -648,7 +648,7 @@ class FeedbackRiñones(Resource):
 class FeedbackCorazon(Resource):
     @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_corazon_args)
-    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    @feedbackNs.doc(responses={200: 'Éxito', 400: "Solicitud invalida", 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
         feedback = feedback_corazon_args.parse_args()
         feedback["contraccion_ventricular_prematura"] = request.values.get('contraccion_ventricular_prematura') is not None and request.values.get('contraccion_ventricular_prematura').lower() == 'true' 
@@ -691,7 +691,7 @@ class FeedbackCorazon(Resource):
 class FeedbackRodilla(Resource):
     @feedbackNs.doc(security=None)
     @feedbackNs.expect(feedback_rodilla_args)
-    @feedbackNs.doc(responses={200: 'Éxito', 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
+    @feedbackNs.doc(responses={200: 'Éxito', 400: "Solicitud invalida", 404: 'Id de imagen no existente', 500: 'Server Error: Fallo al procesar la solicitud'})
     def post(self):
         feedback = feedback_rodilla_args.parse_args()
         feedback["rotura_lca"] = request.values.get('rotura_lca') is not None and request.values.get('rotura_lca').lower() == 'true' 
@@ -699,7 +699,11 @@ class FeedbackRodilla(Resource):
         feedback["imagen_id"] = request.values.get('imagen_id')
         print(feedback)
         try:
-            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app------?id_image={feedback["imagen_id"]}&rotura_lca={feedback["rotura_lca"]}&lca_sano={feedback["lca_sano"]}'
+            url = f'https://diagnosticaria-oe6mpxtbxa-uc.a.run.app/feedback-lca?id_imagen={feedback["imagen_id"]}'
+            if (request.values.get('rotura_lca') is not None and request.values.get('rotura_lca').lower() == 'true' ):
+                url += "&rotura_lca="+request.values.get('rotura_lca')
+            if (request.values.get('lca_sano') is not None and request.values.get('lca_sano').lower() == 'true'):
+                url += "&sano="+request.values.get('lca_sano')
             if (request.values.get('comentario') is not None):
                 url += "&comentario="+request.values.get('comentario')
             print(url)
@@ -707,6 +711,8 @@ class FeedbackRodilla(Resource):
             # Procesar la respuesta
             if response.status_code == 200:
                 return {"message": "Feedback enviado correctamente"}, 200
+            elif response.status_code == 400:
+                return {"error": "Solicitud invalida"}, 400
             elif response.status_code == 404:
                 return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
         except Exception as ex:
