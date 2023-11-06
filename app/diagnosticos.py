@@ -85,7 +85,6 @@ class HistorialResource(Resource):
             # Historial formateado según la estructura del response
             historial_formateado = []
             for diagnostico in historial:
-                print(diagnostico)
                 diagnostico_dict = {
                     "id": diagnostico[0],
                     "imagen_id": diagnostico[1],
