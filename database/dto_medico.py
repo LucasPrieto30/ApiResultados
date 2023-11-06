@@ -311,7 +311,7 @@ def set_code(codigo, dni):
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
-            cursor.execute("""UPDATE public.usuario SET reset_code=%s, code_timestamp = NOW() WHERE dni=%s;""", (codigo,dni,))
+            cursor.execute("""UPDATE public.usuario SET reset_code=%s, reset_code_timestamp = NOW() WHERE dni=%s;""", (codigo,dni,))
             connection.commit()
             return True
     except Exception as e:
