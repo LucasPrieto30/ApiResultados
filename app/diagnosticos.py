@@ -66,14 +66,15 @@ class HistorialResource(Resource):
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                query_sql = 'SELECT d.id, d.imagen_id, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico, d.datos_paciente FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni'
+                query_sql = 'SELECT d.id, d.imagen_id, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico, pgp_sym_decrypt(d.datos_paciente::bytea, %s, %s) AS datos_paciente_descifrados FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni'
 
                 if verificar_Usuario_rol_medico(rol_id):
-                    cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
+                    cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (clave_maestra, 'compress-algo=0,cipher-algo=AES128', id_usuario))
+                    #cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
                 elif rol_id == 1:
                     # Consulta para auditores sin la columna "resultado"
                     #cursor.execute(query_sql)
-                    cursor.execute(query_sql)
+                    cursor.execute(query_sql, (clave_maestra, 'compress-algo=0,cipher-algo=AES128'))
 
                 else:
                     return {"error": "Rol no válido"}, 400
@@ -84,6 +85,7 @@ class HistorialResource(Resource):
             # Historial formateado según la estructura del response
             historial_formateado = []
             for diagnostico in historial:
+                print(diagnostico)
                 diagnostico_dict = {
                     "id": diagnostico[0],
                     "imagen_id": diagnostico[1],
@@ -96,7 +98,8 @@ class HistorialResource(Resource):
                     "modelo_nombre": diagnostico[9],
                     "nombre_medico": diagnostico[10],
                     #"imagen": base64.b64encode(base64.b64decode(diagnostico[11])).decode('utf-8'),
-                    "datos_paciente": desencriptar_campo(diagnostico[11], clave_maestra)
+                    #"datos_paciente": desencriptar_campo(diagnostico[11], clave_maestra)
+                    "datos_paciente":diagnostico[11]
                 }
 
                 # Verificar el rol y agregar o excluir la columna "resultado"
