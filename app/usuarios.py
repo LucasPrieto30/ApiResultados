@@ -400,19 +400,24 @@ class VerificarCodigo(Resource):
 			try:
 				connection = get_connection()
 				with connection.cursor() as cursor:
-					cursor.execute("SELECT verify_code FROM public.usuario WHERE dni = %s", (dni,))
-					resultado = cursor.fetchone()
-					cod_db= resultado[0]
-					cursor.close() 
-					connection.close() 
-					
-					# Verificar el código OTP 
-					if cod_db == codigo: 
-						borrar_codigo(dni)
-						# El código es válido y corresponde al usuario 
-						return {'msg': 'Código válido'}, 200
+					cursor.execute("SELECT * FROM public.usuario WHERE dni = %s", (dni,))
+					user = cursor.fetchone()
+					if user is None:
+						return {'msg': 'Usuario inexistente'}, 404
 					else:
-						return {'msg': 'Código inválido'}, 401
+						cursor.execute("SELECT verify_code FROM public.usuario WHERE dni = %s", (dni,))
+						resultado = cursor.fetchone()
+						cod_db= resultado[0]
+						connection.close() 
+				
+					if cod_db:
+						# Verificar el código OTP 
+						if cod_db == codigo: 
+							borrar_codigo(dni)
+							# El código es válido y corresponde al usuario 
+							return {'msg': 'Código válido'}, 200
+						else:
+							return {'msg': 'Código inválido'}, 401
 			except Exception as ex:
 				return {"message": str(ex)}, 500	
 
