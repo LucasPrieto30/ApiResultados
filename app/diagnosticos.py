@@ -90,10 +90,10 @@ class HistorialResource(Resource):
                 else:
                     apellido_usuario, nombre_usuario = '', diagnostico[8]
 
-                if ', ' in diagnostico[10]:
+                if diagnostico[10] is not None and ', ' in diagnostico[10]:
                     apellido_medico, nombre_medico= diagnostico[10].split(', ')
                 else:
-                    apellido_medico, nombre_medico = '', diagnostico[10]
+                    apellido_medico, nombre_medico = None, diagnostico[10]
                 diagnostico_dict = {
                     "id": diagnostico[0],
                     "imagen_id": diagnostico[1],

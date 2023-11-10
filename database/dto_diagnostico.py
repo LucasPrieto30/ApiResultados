@@ -58,10 +58,10 @@ def obtener_diagnostico(id_diagnostico, rol):
                 else:
                     apellido_usuario, nombre_usuario = '', row[8]
 
-                if ', ' in  row[10]:
+                if  row[10] is not None and ', ' in  row[10]:
                     apellido_medico, nombre_medico=  row[10].split(', ')
                 else:
-                    apellido_medico, nombre_medico = '',  row[10]
+                    apellido_medico, nombre_medico = None,  row[10] 
                 diagnostico = {
                     "id": row[0],  
                     "imagen_id": row[1],
