@@ -344,3 +344,20 @@ def checkUsuarioPorDni_reset(dni):
         return usuarioBD
     else:
         return None
+    
+def identify_user_by_reset_token(reset_token):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT dni FROM public.usuario where reset_token = %s", ( reset_token,))
+    usuarioBD = cursor.fetchone()
+    if usuarioBD:
+        return usuarioBD[0]
+    else:
+        return None
+    
+def reset_user_password(reset_token, new_password):
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("UPDATE public.usuario SET reset_code = NULL, password = %s WHERE reset_token = %s;", (new_password, reset_token,))
+    connection.commit()
+    connection.close()

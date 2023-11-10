@@ -190,3 +190,10 @@ feedback_muñeca_args.add_argument('imagen_id', type=int, required=True, help='I
 feedback_muñeca_args.add_argument('fractura', type=bool, required=False, help='fractura')
 feedback_muñeca_args.add_argument('sano', type=bool, required=False, help='sano')
 feedback_muñeca_args.add_argument('comentario', type=str, required=False, help='Comentario del médico')
+
+verify_code_parser = reqparse.RequestParser()
+verify_code_parser.add_argument('codigo', type=str, required=True)
+
+reset_password_parser = reqparse.RequestParser()
+reset_password_parser.add_argument('new_password', type=str, required=True)
+reset_password_parser.add_argument('confirm_password', type=str, required=True)

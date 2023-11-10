@@ -1,8 +1,8 @@
 import base64
 from flask_restx import Resource, Namespace, fields
 import pyotp
-from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico, login_model, login_model_response, verificar_codigo_model,reset_password_model
-from flask import jsonify, request
+from .modelos import post_model, pacienteDiagnostico, post_model2, post_medico, login_model, login_model_response, verificar_codigo_model,reset_password_model,verify_code_parser,reset_password_parser
+from flask import jsonify, request, session
 from database.db import get_connection
 from werkzeug.utils import secure_filename
 import os
@@ -11,13 +11,14 @@ from psycopg2 import Binary
 import requests
 from .crud_medico import CrudMedico , validar_contrasena
 from flask_restx import Api
-from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass, guardar_codigo, borrar_codigo,set_code, checkUsuarioPorDni_reset
+from database.dto_medico import obtener_clave_desde_Medico, checkUsuarioPorDni, verificarPassword, get_ultimo_cambio_pass, guardar_codigo, borrar_codigo,set_code, checkUsuarioPorDni_reset,identify_user_by_reset_token,reset_user_password
 import argparse
 import datetime
 import re
 from .correo import enviar_codigo_correo, enviar_codigo_correo_reset
 from app.jwt_config import require_auth, generate_token, verify_token
 import random
+import uuid
 
 SECRET_KEY = 'dtcp23'
 # Convertir la clave secreta a bytes
@@ -507,3 +508,68 @@ class ResetPassword(Resource):
             return {"message": str(ex)}, 500
         finally:
             connection.close()
+            
+
+def generate_temporary_token():
+    token = str(uuid.uuid4())
+    return token
+
+@ns_usuarios.route('/check_code')
+class VerifyCode(Resource):
+    @ns_usuarios.expect(verify_code_parser)
+    def post(self):
+        args = verify_code_parser.parse_args()
+        codigo = args['codigo']
+
+        try:
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT reset_code, dni FROM public.usuario WHERE reset_code = %s", (codigo,))
+                result = cursor.fetchone()
+                if result:
+                    dni = result[1]
+
+                    session['reset_token'] = generate_temporary_token()
+                    
+                    cursor.execute("UPDATE usuario SET reset_token = %s WHERE reset_code = %s", (session['reset_token'], codigo))
+                    connection.commit()
+					
+                    return {'msg': 'Codigo verificado exitosamente', 'dni': dni}, 200
+                else:
+                    return {'msg': 'Codigo invalido'}, 401
+        except Exception as ex:
+            return {"message": str(ex)}, 500
+        finally:
+            connection.close()
+
+
+@ns_usuarios.route('/reset_password')
+class ResetPassword(Resource):
+    @ns_usuarios.expect(reset_password_parser)
+    def post(self):
+        args = reset_password_parser.parse_args()
+        new_password = args['new_password']
+        confirm_password = args['confirm_password']
+        
+        error = validar_contrasena(new_password)
+        if error is not None:
+            return {"message": error}, 400        
+        try:            
+            reset_token = session.get('reset_token')
+            if reset_token:
+                if new_password == confirm_password:        
+                    user_dni = identify_user_by_reset_token(reset_token)
+                    if user_dni:
+                        reset_user_password(reset_token, new_password)
+
+                        session.pop('reset_token', None)
+
+                        return {'msg': 'Contraseña actualizada.'}, 200
+                    else:
+                        return {'msg': 'Token Invalido'}, 401
+                else:
+                    return {'msg': 'Contraseñas no coinciden.'}, 400
+            else:
+                return {'msg': 'Token Invalido'}, 401
+        except Exception as ex:
+            return {"message": str(ex)}, 500
