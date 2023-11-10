@@ -68,7 +68,7 @@ class HistorialResource(Resource):
             with connection.cursor() as cursor:
                 query_sql = 'SELECT d.id, d.imagen_id, d.datos_complementarios, d.fecha, d.resultado, d.usuario_id, d.usuario_medico_dni, d.modelo_id, u.nombre as nombre_usuario, mo.nombre as modelo_nombre, me.nombre as nombre_medico, pgp_sym_decrypt(d.datos_paciente::bytea, %s, %s) AS datos_paciente_descifrados FROM Diagnostico as d INNER JOIN public.usuario as u ON d.usuario_id = u.id INNER JOIN public.modelo as mo ON mo.id = d.modelo_id LEFT JOIN public.usuario as me ON d.usuario_medico_dni = me.dni'
 
-                if verificar_Usuario_rol_medico(rol_id):
+                if rol_id == 4:
                     cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (clave_maestra, 'compress-algo=0,cipher-algo=AES128', id_usuario))
                     #cursor.execute(query_sql + " WHERE d.usuario_medico_id = %s", (id_usuario,))
                 elif rol_id == 1:
