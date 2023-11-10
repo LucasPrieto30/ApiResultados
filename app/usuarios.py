@@ -464,7 +464,7 @@ class reset_password(Resource):
 		if not dni:
 			return {'message': 'Por favor, ingrese DNI'}, 400
 		if usuarioExistente:
-			codigo_reset = random.randint(1000, 9999)
+			codigo_reset = random.randint(100000, 999999)
 			set_code(codigo_reset,dni)
 			print(f"Done")
 			enviar_codigo_correo_reset(usuarioExistente[4], codigo_reset)
