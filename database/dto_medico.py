@@ -57,8 +57,13 @@ def consultar_medico_id(medico_id):
         cursor.execute(select_query, (clave_maestra, medico_id))
         medico_data = cursor.fetchone()
         if medico_data:
+            if ', ' in medico_data[1]:
+                apellido_usuario, nombre_usuario = medico_data[1].split(', ')
+            else:
+                apellido_usuario, nombre_usuario = '', medico_data[1]
             id = medico_data[0]
-            nombre = medico_data[1]
+            nombre = nombre_usuario
+            apellido = apellido_usuario
             dni = medico_data[2]
             email_descifrado = medico_data[3]
             password = medico_data[4]
@@ -77,6 +82,7 @@ def consultar_medico_id(medico_id):
             medico = {
                 "id": id,
                 "nombre": nombre,
+                "apellido": apellido,
                 "dni": dni,
                 "email": email_descifrado,
                 "password": password,

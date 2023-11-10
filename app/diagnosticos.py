@@ -85,6 +85,15 @@ class HistorialResource(Resource):
             # Historial formateado según la estructura del response
             historial_formateado = []
             for diagnostico in historial:
+                if ', ' in diagnostico[8]:
+                    apellido_usuario, nombre_usuario = diagnostico[8].split(', ')
+                else:
+                    apellido_usuario, nombre_usuario = '', diagnostico[8]
+
+                if ', ' in diagnostico[10]:
+                    apellido_medico, nombre_medico= diagnostico[10].split(', ')
+                else:
+                    apellido_medico, nombre_medico = '', diagnostico[10]
                 diagnostico_dict = {
                     "id": diagnostico[0],
                     "imagen_id": diagnostico[1],
@@ -93,9 +102,11 @@ class HistorialResource(Resource):
                     "usuario_id": diagnostico[5],
                     "usuario_medico_dni": diagnostico[6],
                     "modelo_id": diagnostico[7],
-                    "nombre_usuario": diagnostico[8],
+                    "nombre_usuario": nombre_usuario,
+                    "apellido_usuario": apellido_usuario,
                     "modelo_nombre": diagnostico[9],
-                    "nombre_medico": diagnostico[10],
+                    "nombre_medico": nombre_medico,
+                    "apellido_medico": apellido_medico,
                     #"imagen": base64.b64encode(base64.b64decode(diagnostico[11])).decode('utf-8'),
                     #"datos_paciente": desencriptar_campo(diagnostico[11], clave_maestra)
                     "datos_paciente":diagnostico[11]

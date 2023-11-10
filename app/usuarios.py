@@ -73,9 +73,14 @@ class Medicos(Resource):
                 resultados = cursor.fetchall()
                 medicos = []
                 for resultado in resultados:
+                    if ', ' in resultado[1]:
+                        apellido, nombre = resultado[1].split(', ')
+                    else:
+                        apellido, nombre = '', resultado[1]
                     usuario = {
                         'id': resultado[0],
-                        'nombre': resultado[1],
+                        'nombre': nombre,
+						'apellido': apellido,
                         'rol_id': resultado[2],
                         'establecimiento_id': resultado[3],
                         'establecimiento_nombre': resultado[4],
@@ -171,7 +176,7 @@ class Usuarios(Resource):
 			nombre = args['nombre']
 			dni = args['dni']
 			apellido = args['apellido']
-			nombre_apellido = f"{nombre} {apellido}"
+			nombre_apellido = f"{apellido}, {nombre}"
 			password = args['password']
 			rol_id = args['rol_id']
 			establecimiento_id = args['establecimiento_id']
@@ -315,6 +320,7 @@ login_model_response = ns_usuarios.model('LoginResponse', {
     'token': fields.String(description='Token de acceso'),
     'id': fields.Integer(description='ID del usuario'),
     'nombre': fields.String(description='Nombre del usuario'),
+	'apellido': fields.String(description='Apellido del usuario'),
     'rol_id': fields.Integer(description='ID del rol del usuario'),
     'dni': fields.String(description='DNI del usuario'),
     'email': fields.String(description='Email del usuario'),
@@ -348,9 +354,14 @@ class Login(Resource):
 			# Verificar si el usuario tiene una contraseña valida (no expirada)
 			# if not validPassword(usuarioExistente[1]):
 			# 	return {'message' : 'La contraseña ha expirado'}, 403
+			if ', ' in usuarioExistente[1]:
+				apellido, nombre = usuarioExistente[1].split(', ')
+			else:
+				apellido, nombre = '', usuarioExistente[1]
 			usuario = {
 					'id': usuarioExistente[0],
-					'nombre': usuarioExistente[1],
+					'nombre': nombre,
+					'apellido': apellido,
 					'rol_id': usuarioExistente[2],
 					'dni': usuarioExistente[3],
 					'email': usuarioExistente[4],
@@ -377,7 +388,8 @@ class Login(Resource):
 			usuario_data = {
 				'token': token,
 				'id': usuarioExistente[0],
-				'nombre': usuarioExistente[1],
+				'nombre': nombre,
+				'apellido': apellido,
 				'rol_id': usuarioExistente[2],
 				'dni': usuarioExistente[3],
 				'email': usuarioExistente[4],

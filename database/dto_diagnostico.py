@@ -53,6 +53,15 @@ def obtener_diagnostico(id_diagnostico, rol):
             imagen_base64 = base64.b64encode(imagen_decodificada).decode('utf-8')
 
             if row is not None:
+                if ', ' in row[8]:
+                    apellido_usuario, nombre_usuario = row[8].split(', ')
+                else:
+                    apellido_usuario, nombre_usuario = '', row[8]
+
+                if ', ' in  row[10]:
+                    apellido_medico, nombre_medico=  row[10].split(', ')
+                else:
+                    apellido_medico, nombre_medico = '',  row[10]
                 diagnostico = {
                     "id": row[0],  
                     "imagen_id": row[1],
@@ -62,9 +71,11 @@ def obtener_diagnostico(id_diagnostico, rol):
                     "usuario_id": row[5],
                     "usuario_medico_dni": row[6],
                     "modelo_id": row[7],
-                    "nombre_usuario": row[8],
+                    "nombre_usuario": nombre_usuario,
+                    "apellido_usuario": apellido_usuario,
                     "modelo_nombre": row[9],
-                    "nombre_medico": row[10],
+                    "nombre_medico": nombre_medico,
+                    "apellido_medico": apellido_medico,
                     "imagen": imagen_base64
                     #"datos_paciente": row[12]
                 }
