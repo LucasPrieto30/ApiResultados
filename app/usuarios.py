@@ -473,41 +473,41 @@ class reset_password(Resource):
 		return {'message' : 'Usuario inexistente'}, 404
 	
 
-@ns_usuarios.route('/reset_password_new/')
-class ResetPassword(Resource):
-    @ns_usuarios.expect(reset_password_model)
-    def post(self):
-        args = reset_password_model.parse_args()
-        dni = args['dni']
-        codigo = args['codigo']
-        new_password = args['new_password']
-        confirm_password = args['confirm_password']
+# @ns_usuarios.route('/reset_password_new/')
+# class ResetPassword(Resource):
+#     @ns_usuarios.expect(reset_password_model)
+#     def post(self):
+#         args = reset_password_model.parse_args()
+#         dni = args['dni']
+#         codigo = args['codigo']
+#         new_password = args['new_password']
+#         confirm_password = args['confirm_password']
 
-        try:
-            connection = get_connection()
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT reset_code FROM public.usuario WHERE dni = %s", (dni,))
-                codigoreset = cursor.fetchone()
-                codigoreset = codigoreset[0] if codigoreset else None
-                cursor.close()
+#         try:
+#             connection = get_connection()
+#             with connection.cursor() as cursor:
+#                 cursor.execute("SELECT reset_code FROM public.usuario WHERE dni = %s", (dni,))
+#                 codigoreset = cursor.fetchone()
+#                 codigoreset = codigoreset[0] if codigoreset else None
+#                 cursor.close()
                 
-            if codigoreset == codigo:
-                error = validar_contrasena(new_password)
-                if error is not None:
-                    return {"message": error}, 400
-                elif new_password == confirm_password:
-                    with connection.cursor() as cursor:
-                        cursor.execute("UPDATE public.usuario SET reset_code = NULL, password = %s WHERE dni = %s;", (new_password, dni))
-                        connection.commit()
-                    return {'msg': 'Contraseña actualizada.'}, 200
-                else:
-                    return {'msg': 'Contraseñas no coinciden.'}, 400
-            else:
-                return {'msg': 'Codigo invalido'}, 401
-        except Exception as ex:
-            return {"message": str(ex)}, 500
-        finally:
-            connection.close()
+#             if codigoreset == codigo:
+#                 error = validar_contrasena(new_password)
+#                 if error is not None:
+#                     return {"message": error}, 400
+#                 elif new_password == confirm_password:
+#                     with connection.cursor() as cursor:
+#                         cursor.execute("UPDATE public.usuario SET reset_code = NULL, password = %s WHERE dni = %s;", (new_password, dni))
+#                         connection.commit()
+#                     return {'msg': 'Contraseña actualizada.'}, 200
+#                 else:
+#                     return {'msg': 'Contraseñas no coinciden.'}, 400
+#             else:
+#                 return {'msg': 'Codigo invalido'}, 401
+#         except Exception as ex:
+#             return {"message": str(ex)}, 500
+#         finally:
+#             connection.close()
             
 
 def generate_temporary_token():
