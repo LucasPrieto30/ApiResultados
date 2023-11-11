@@ -573,3 +573,31 @@ class ResetPassword(Resource):
                 return {'msg': 'Token Invalido'}, 401
         except Exception as ex:
             return {"message": str(ex)}, 500
+
+
+@ns_usuarios.route('/establecimientos')
+@ns_usuarios.doc(responses={200: 'Éxito', 500: 'Error interno del servidor'})
+class Medicos(Resource):
+    def get(self):
+        try:
+            connection = get_connection()
+            with connection.cursor() as cursor:
+                consulta = "SELECT * FROM public.establecimiento"
+                cursor.execute(consulta)
+                resultados = cursor.fetchall()
+                establecimientos = []
+                for resultado in resultados:
+                    establecimiento = {
+                        'id': resultado[0],
+                        'nombre': resultado[1],
+						'direccion': resultado[2],
+                    }
+                    establecimientos.append(establecimiento)
+
+                cursor.close()
+                connection.close()
+                return establecimientos, 200
+        except Exception as ex:
+            return jsonify({"message": str(ex.__cause__)}), 500
+
+
