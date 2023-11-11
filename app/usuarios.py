@@ -19,6 +19,7 @@ from .correo import enviar_codigo_correo, enviar_codigo_correo_reset
 from app.jwt_config import require_auth, generate_token, verify_token
 import random
 import uuid
+import bcrypt
 
 SECRET_KEY = 'dtcp23'
 # Convertir la clave secreta a bytes
@@ -52,7 +53,6 @@ user_parser_update = api.parser()
 user_parser_update.add_argument('dni', type=str, required=True, help='DNI')
 user_parser_update.add_argument('new_dni', type=str, required=False, help='Nuevo DNI')
 user_parser_update.add_argument('nombre', type=str, required=False, help='Nombre')
-user_parser_update.add_argument('password', type=str, required=False, help='Contraseña')
 user_parser_update.add_argument('rol_id', type=int, required=False, help='Rol ID')
 user_parser_update.add_argument('establecimiento_id', type=int, required=False, help='Id del establecimiento')
 user_parser_update.add_argument('especialidad', type=str, required=False, help='especialidad')
@@ -214,9 +214,10 @@ class Usuarios(Resource):
 				correoExistente= cursor.fetchone()[0]
 				if correoExistente:
 					return {"message": "Usuario email ya existe"}, 409
-					
+				
+				password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 				consulta = "INSERT INTO public.usuario (nombre, dni, email, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad) VALUES (%s, %s,pgp_sym_encrypt(%s, %s, %s), %s, %s, %s, %s, %s) RETURNING id;"
-				cursor.execute(consulta, (nombre_apellido, dni, email, clave,arg2, password, rol_id, establecimiento_id, fecha_ultima_password, especialidad))
+				cursor.execute(consulta, (nombre_apellido, dni, email, clave,arg2, password_hash, rol_id, establecimiento_id, fecha_ultima_password, especialidad))
 				new_user_id = cursor.fetchone()[0]
 				connection.commit()
 				if (rol_id == 4):
@@ -271,10 +272,10 @@ class UpdateUserInfo(Resource):
 
 			new_nombre = args['nombre']
 			new_dni = args['new_dni']
-			new_password = args['password']
+			#new_password = args['password']
 			new_rol_id = args['rol_id']
 			new_establecimiento = args['establecimiento_id']
-
+			new_especialidad = args['especialidad']
 			connection = get_connection()
 			with connection.cursor() as cursor:
 				cursor.execute("SELECT id FROM public.usuario WHERE dni = %s", (dni,))
@@ -289,21 +290,24 @@ class UpdateUserInfo(Resource):
 				if new_dni:
 					update_sql += " dni = %s,"
 					params.append(new_dni)
-				if new_password:
-					zona_horaria_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
-					# Obtiene la fecha y hora actual en la zona horaria de Argentina
-					fecha_hora_argentina = datetime.datetime.now(zona_horaria_argentina)
-					# Obtener la fecha actual
-					fecha_ultima_password = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
-					update_sql += " password = %s, fecha_ultima_password = %s,"
-					params.append(new_password)
-					params.append(fecha_ultima_password)
+				# if new_password:
+				# 	zona_horaria_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
+				# 	# Obtiene la fecha y hora actual en la zona horaria de Argentina
+				# 	fecha_hora_argentina = datetime.datetime.now(zona_horaria_argentina)
+				# 	# Obtener la fecha actual
+				# 	fecha_ultima_password = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
+				# 	update_sql += " password = %s, fecha_ultima_password = %s,"
+				# 	params.append(new_password)
+				# 	params.append(fecha_ultima_password)
 				if new_rol_id:
 					update_sql += " rol_id = %s,"
 					params.append(new_rol_id)
 				if new_establecimiento:
 					update_sql += " establecimiento_id = %s,"
 					params.append(new_establecimiento)
+				if new_especialidad:
+					update_sql += " especialidad = %s,"
+					params.append(new_especialidad)
 
 				update_sql = update_sql.rstrip(',') + " WHERE dni = %s;"
 				params.append(dni)

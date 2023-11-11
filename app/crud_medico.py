@@ -6,7 +6,7 @@ class CrudMedico:
             "nombre": datos_medico.get("nombre"),
             "dni": datos_medico.get("dni"),
             "email": datos_medico.get("email"),
-            "password": datos_medico.get("password"),
+            #"password": datos_medico.get("password"),
             "rol_id": datos_medico.get("rol_id"),
             "establecimiento_id": datos_medico.get("establecimiento_id"),
             "fecha_ultima_password": datos_medico.get("fecha_ultima_password"),

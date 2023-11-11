@@ -3,6 +3,8 @@ from cryptography.fernet import Fernet
 import psycopg2
 from datetime import datetime
 import os
+import bcrypt
+
 def cargar_clave_medico():
     with open("clave_medico.key", "rb") as archivo:
         return archivo.read()
@@ -66,7 +68,7 @@ def consultar_medico_id(medico_id):
             apellido = apellido_usuario
             dni = medico_data[2]
             email_descifrado = medico_data[3]
-            password = medico_data[4]
+            #password = medico_data[4]
             rol_id = medico_data[5]
             establecimiento_id = medico_data[6]
             fecha_ultima_password = medico_data[7]
@@ -85,7 +87,7 @@ def consultar_medico_id(medico_id):
                 "apellido": apellido,
                 "dni": dni,
                 "email": email_descifrado,
-                "password": password,
+                #"password": password,
                 "rol_id": rol_id,
                 "establecimiento_id": establecimiento_id,
                 "fecha_ultima_password": fecha_ultima_password_str,
@@ -271,11 +273,17 @@ def checkUsuarioPorDni(dni):
         return usuarioBD
     else:
         return None
-    
+
 def verificarPassword(password, usuarioExistente):
-    return len(usuarioExistente) > 5 and password == usuarioExistente[5]
-
-
+    if len(usuarioExistente) > 5:
+        # Codifica la contraseña en bytes antes de usar bcrypt.checkpw
+        recovered_password = bytes.fromhex(usuarioExistente[5][2:])
+        password_encoded = password.encode('utf-8')
+        # Usa bcrypt.checkpw para verificar la contraseña
+        return bcrypt.checkpw(password_encoded, recovered_password)
+        # Verifica si la contraseña coincide
+    else:
+        return False
 def get_ultimo_cambio_pass(dni): 
     connection = get_connection()
     with connection.cursor() as cursor:
@@ -356,8 +364,9 @@ def identify_user_by_reset_token(reset_token):
         return None
     
 def reset_user_password(reset_token, new_password):
+    password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("UPDATE public.usuario SET reset_code = NULL, password = %s WHERE reset_token = %s;", (new_password, reset_token,))
+    cursor.execute("UPDATE public.usuario SET reset_code = NULL, password = %s WHERE reset_token = %s;", (password_hash, reset_token,))
     connection.commit()
     connection.close()
