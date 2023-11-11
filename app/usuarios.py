@@ -57,7 +57,10 @@ user_parser_update.add_argument('rol_id', type=int, required=False, help='Rol ID
 user_parser_update.add_argument('establecimiento_id', type=int, required=False, help='Id del establecimiento')
 user_parser_update.add_argument('especialidad', type=str, required=False, help='especialidad')
 
-
+contacto_parser = api.parser()
+contacto_parser.add_argument('nombre_apellido', type=str, required=True, help='Nombre y apellido')
+contacto_parser.add_argument('email', type=str, required=True, help='Email')
+contacto_parser.add_argument('mensaje', type=str, required=True, help='Mensaje')
 
 crud2 = CrudMedico()
 
@@ -600,4 +603,37 @@ class Medicos(Resource):
         except Exception as ex:
             return jsonify({"message": str(ex.__cause__)}), 500
 
+@ns_usuarios.route('/contacto')
+class Usuarios(Resource):
+	@ns_usuarios.doc(security=None)
+	@ns_usuarios.expect(contacto_parser)
+	@ns_usuarios.doc(responses={201: 'Mensaje enviado correctamente', 500: 'Error interno del servidor'})
+	def post(self):
+		try:
+			args = contacto_parser.parse_args()
+			#Define el email y la clave
+			email = args['email'].lower()
+			nombre_apellido = args['nombre_apellido']
+			mensaje = args['mensaje']
+
+			zona_horaria_argentina = pytz.timezone('America/Argentina/Buenos_Aires')
+
+			# Obtiene la fecha y hora actual en la zona horaria de Argentina
+			fecha_hora_argentina = datetime.datetime.now(zona_horaria_argentina)
+			# Obtener la fecha actual
+			fecha = fecha_hora_argentina.strftime('%Y-%m-%d %H:%M:%S')
+
+			connection = get_connection()
+			with connection.cursor() as cursor:
+				consulta = "INSERT INTO public.contacto (nombre_apellido, email, mensaje, fecha) VALUES (%s, %s, %s, %s);"
+				cursor.execute(consulta, (nombre_apellido, email, mensaje, fecha))
+				connection.commit()
+			cursor.close()
+			connection.close()
+
+			return {"message": "Mensaje enviado correctamente"}, 201
+
+		except psycopg2.Error as ex:
+    # Manejar excepciones específicas de PostgreSQL aquí
+			return {"message": str(ex)}, 500
 
