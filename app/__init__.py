@@ -25,6 +25,6 @@ def create_app():
     api.add_namespace(ns2)
     api.add_namespace(ns_usuarios)
     api.add_namespace(feedbackNs)
-    CORS(app)
+    CORS(app,supports_credentials=True)
 
     return app
