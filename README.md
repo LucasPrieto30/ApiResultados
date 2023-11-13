@@ -188,6 +188,8 @@ Obtiene los usuario con rol de médico
 Ejemplo de uso
 ![image](https://github.com/LucasPrieto30/ApiResultados/assets/66337029/c3ad6f1f-a191-4741-99cd-ab1c21a5f198)
 
+#### /Usuarios/contacto [POST]
+Recibe el nombre, apellido, email del usuario y el mensaje y lo guarda en la base de datos.
 
 #### /Usuarios/establecimientos [GET]
 Obtiene todos los establecimientos médicos registrados en el sistema.
