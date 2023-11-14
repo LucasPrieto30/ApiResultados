@@ -600,8 +600,8 @@ class FeedbackCerebro(Resource):
             if response.status_code == 200:
                 data = response.json()
                 return {"message": "Feedback enviado correctamente"}, 200
-            elif response.status_code == 404:
-                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+            elif response.status_code == 204:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': 404}, 404
         except Exception as ex:
            return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
 
@@ -625,8 +625,8 @@ class FeedbackPulmones(Resource):
             # Procesar la respuesta
             if response.status_code == 200:
                 return {"message": "Feedback enviado correctamente"}, 200
-            elif response.status_code == 404:
-                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+            elif response.status_code == 204:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': 404}, 404
         except Exception as ex:
            return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
         
@@ -652,8 +652,8 @@ class FeedbackRiñones(Resource):
             # Procesar la respuesta
             if response.status_code == 200:
                 return {"message": "Feedback enviado correctamente"}, 200
-            elif response.status_code == 404:
-                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': response.status_code}, response.status_code
+            elif response.status_code == 204:
+                return {'error': 'Error al enviar el feedback del modelo: id de imagen no existente', 'status_code': 404}, 404
         except Exception as ex:
            return {'message': "Error al enviar el feedback al modelo: " + str(ex)}, 500
         
