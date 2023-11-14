@@ -516,10 +516,13 @@ class reset_password(Resource):
 #         finally:
 #             connection.close()
             
-
+from flask import make_response
 def generate_temporary_token():
     token = str(uuid.uuid4())
     return token
+#firmar un token
+def sign_token(token):
+    return jwt.encode({'reset_token': token}, obtener_clave_desde_Medico(), algorithm='HS256')
 
 @ns_usuarios.route('/check_code')
 class VerifyCode(Resource):
@@ -535,13 +538,16 @@ class VerifyCode(Resource):
                 result = cursor.fetchone()
                 if result:
                     dni = result[1]
-
-                    session['reset_token'] = generate_temporary_token()
-                    
-                    cursor.execute("UPDATE usuario SET reset_token = %s WHERE reset_code = %s", (session['reset_token'], codigo))
+                    reset_token = generate_temporary_token()
+                    #session['reset_token'] = generate_temporary_token()
+                    #print(session['reset_token'])
+                    signed_token = sign_token(reset_token)
+                    cursor.execute("UPDATE usuario SET reset_token = %s WHERE reset_code = %s", (reset_token, codigo))
                     connection.commit()
-					
-                    return {'msg': 'Codigo verificado exitosamente', 'dni': dni}, 200
+                    response_data = {'msg': 'Codigo verificado exitosamente', 'dni': dni, 'token': signed_token}
+                    response = make_response(response_data, 200)
+                    response.headers['Content-Type'] = 'application/json'
+                    return response
                 else:
                     return {'msg': 'Codigo invalido'}, 401
         except Exception as ex:
@@ -549,6 +555,15 @@ class VerifyCode(Resource):
         finally:
             connection.close()
 
+#firma del token
+def verify_reset_token_signature(reset_token):
+    try:
+        decoded_token = jwt.decode(reset_token, obtener_clave_desde_Medico(), algorithms=['HS256'])
+        return decoded_token
+    except jwt.ExpiredSignatureError:
+        return None  #  expirado
+    except jwt.InvalidTokenError:
+        return None  # inválido
 
 @ns_usuarios.route('/reset_password')
 class ResetPassword(Resource):
@@ -561,23 +576,28 @@ class ResetPassword(Resource):
         error = validar_contrasena(new_password)
         if error is not None:
             return {"message": error}, 400        
-        try:            
-            reset_token = session.get('reset_token')
+        try:           
+            reset_token = request.headers.get('X-Reset-Token')
+            print(reset_token)
             if reset_token:
-                if new_password == confirm_password:        
-                    user_dni = identify_user_by_reset_token(reset_token)
-                    if user_dni:
-                        reset_user_password(reset_token, new_password)
-
-                        session.pop('reset_token', None)
-
+                decoded_token = verify_reset_token_signature(reset_token)
+                if decoded_token:
+                    if new_password == confirm_password:        
+                        user_dni = identify_user_by_reset_token(decoded_token['reset_token'])
+                        if user_dni:
+                            #chequear_reset_token(decoded_token['reset_token'])
+                            reset_user_password(decoded_token['reset_token'], new_password)
+                            print(decoded_token['reset_token'])
+                        #session.pop('reset_token', None)
+                        else:
+                            return {'msg': 'no existe resettoken'}, 401
                         return {'msg': 'Contraseña actualizada.'}, 200
                     else:
-                        return {'msg': 'Token Invalido'}, 401
+                        return {'msg': 'contrasenas no coinciden'}, 400
                 else:
-                    return {'msg': 'Contraseñas no coinciden.'}, 400
+                    return {'msg': 'token invalido'}, 401
             else:
-                return {'msg': 'Token Invalido'}, 401
+                return {'msg': 'Token no proporcionado'}, 401
         except Exception as ex:
             return {"message": str(ex)}, 500
 

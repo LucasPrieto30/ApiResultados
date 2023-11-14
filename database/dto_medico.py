@@ -362,11 +362,11 @@ def identify_user_by_reset_token(reset_token):
         return usuarioBD[0]
     else:
         return None
-    
+
 def reset_user_password(reset_token, new_password):
     password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("UPDATE public.usuario SET reset_code = NULL, password = %s WHERE reset_token = %s;", (password_hash, reset_token,))
+    cursor.execute("UPDATE public.usuario SET reset_code = NULL,reset_token = NULL, password = %s WHERE reset_token = %s;", (password_hash, reset_token,))
     connection.commit()
     connection.close()
