@@ -164,7 +164,7 @@ class PruebaImagen(Resource):
                 cursor.close()
                 connection.close()
             # URL de la API externa a la que deseas enviar la imagen
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}&id_image={siguiente_imagen_id}'
+            url = f'http://averia.chickenkiller.com/predict/fred?perdida_visual={datos["perdida_visual"]}&debilidad_focal={datos["debilidad_focal"]}&convulsiones={datos["convulsiones"]}&id_image={siguiente_imagen_id}'
             print(url)
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
@@ -227,7 +227,7 @@ class PruebaImagen(Resource):
                 cursor.close()
                 connection.close()
             # URL de la API externa a la que deseas enviar la imagen
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/wini?puntada_lateral={datos["puntada_lateral"]}&fiebre={datos["fiebre"]}&dificultad_respiratoria={datos["dificultad_respiratoria"]}&id_image={siguiente_imagen_id}'
+            url = f'http://averia.chickenkiller.com/predict/wini?puntada_lateral={datos["puntada_lateral"]}&fiebre={datos["fiebre"]}&dificultad_respiratoria={datos["dificultad_respiratoria"]}&id_image={siguiente_imagen_id}'
             
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
@@ -351,7 +351,7 @@ class PruebaImagen(Resource):
                 connection.close()
     
             # URL de la API externa a la que deseas enviar la imagen
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/predict/lyso?hermaturia={datos["hermaturia"]}&dolor_lumbar={datos["dolor_lumbar"]}&dolor_abdominal={datos["dolor_abdominal"]}&fiebre={datos["fiebre"]}&perdida_peso={datos["perdida_peso"]}&id_image={siguiente_imagen_id}'
+            url = f'http://averia.chickenkiller.com/predict/lyso?hermaturia={datos["hermaturia"]}&dolor_lumbar={datos["dolor_lumbar"]}&dolor_abdominal={datos["dolor_abdominal"]}&fiebre={datos["fiebre"]}&perdida_peso={datos["perdida_peso"]}&id_image={siguiente_imagen_id}'
             
             # Leer la imagen en formato binario
             with open(os.path.join('app/static', filename), 'rb') as file:
@@ -592,7 +592,7 @@ class FeedbackCerebro(Resource):
         feedback["no_tumor"] = request.values.get('no_tumor') is not None and request.values.get('no_tumor').lower() == 'true' 
         feedback["imagen_id"] = request.values.get('imagen_id')
         try:
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/feedback/fred?id_image={feedback["imagen_id"]}&glioma={feedback["glioma"]}&meningioma={feedback["meningioma"]}&pituitary={feedback["pituitary"]}&no_tumor={feedback["no_tumor"]}'
+            url = f'http://averia.chickenkiller.com/feedback/fred?id_image={feedback["imagen_id"]}&glioma={feedback["glioma"]}&meningioma={feedback["meningioma"]}&pituitary={feedback["pituitary"]}&no_tumor={feedback["no_tumor"]}'
             if (request.values.get('comentario') is not None):
                 url += "&comment="+request.values.get('comentario')
             response = requests.post(url) # data= datos
@@ -617,7 +617,7 @@ class FeedbackPulmones(Resource):
         feedback["imagen_id"] = request.values.get('imagen_id')
         print(feedback)
         try:
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/feedback/wini?id_image={feedback["imagen_id"]}&pneumonia={feedback["pneumonia"]}&no_pneumonia={feedback["no_pneumonia"]}'
+            url = f'http://averia.chickenkiller.com/feedback/wini?id_image={feedback["imagen_id"]}&pneumonia={feedback["pneumonia"]}&no_pneumonia={feedback["no_pneumonia"]}'
             if (request.values.get('comentario') is not None):
                 url += "&comment="+request.values.get('comentario')
             print(url)
@@ -644,7 +644,7 @@ class FeedbackRiñones(Resource):
         feedback["imagen_id"] = request.values.get('imagen_id')
         print(feedback)
         try:
-            url = f'https://averiapi-4vtuhnxfba-uc.a.run.app/feedback/lyso?id_image={feedback["imagen_id"]}&quiste={feedback["quiste"]}&piedra={feedback["piedra"]}&tumor={feedback["tumor"]}&normal={feedback["normal"]}'
+            url = f'http://averia.chickenkiller.com/feedback/lyso?id_image={feedback["imagen_id"]}&quiste={feedback["quiste"]}&piedra={feedback["piedra"]}&tumor={feedback["tumor"]}&normal={feedback["normal"]}'
             if (request.values.get('comentario') is not None):
                 url += "&comment="+request.values.get('comentario')
             print(url)
