@@ -1,6 +1,6 @@
 # ApiResultados
 Api desarrollada en Flask para realizar conexion con el front y los modelos de machine learning.
-Gestiona el acceso y manejo de usuarios, diagnosticos e historial
+Gestiona el acceso y manejo de usuarios, diagnosticos e historial.
 Esta desarrollada en Flask-restx, lo que nos proporciona una interfaz Swagger para una documentacion interactiva de los metodos desarrollados.
 
 La API se encuentra hosteada en Render y se puede acceder a traves del siguiente enlace
